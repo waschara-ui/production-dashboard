@@ -75,6 +75,32 @@ tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
 .step-box{background:#fffbf0;border:1px solid #f0d8a0;border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:11px;color:#633806;line-height:1.8;}
 .step-box b{color:#3a2008;}
 @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.row2,.row2eq,.row3{grid-template-columns:1fr;}}
+/* ── Daily Section Tab ── */
+.sec-tab.active.daily-tab{background:#1a4a7a;color:#a0c8ff;border-color:#1a4a7a;}
+/* ── Data Entry Form ── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:8px;}
+.form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px 12px;margin-top:8px;}
+.fg{display:flex;flex-direction:column;gap:3px;}
+.fg label{font-size:11px;font-weight:700;color:#854f0b;}
+.fg input,.fg select{padding:7px 10px;border:1.5px solid #f0c060;border-radius:7px;font-size:12px;color:#3a2008;background:#fffbf0;outline:none;width:100%;}
+.fg input:focus,.fg select:focus{border-color:#ba7517;}
+.section-lbl{font-size:11px;font-weight:700;color:#854f0b;margin:14px 0 4px;padding-top:12px;border-top:1px solid #f0d8a0;}
+/* ── Modal Tabs ── */
+.mtabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #f0d8a0;}
+.mtab{padding:7px 22px;border:none;background:transparent;color:#a07030;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s;}
+.mtab.active{color:#633806;border-bottom-color:#633806;}
+.mtab-pane{display:none;}
+.mtab-pane.active{display:block;}
+/* ── Entry Status ── */
+.emsg{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-top:10px;display:none;}
+.emsg.ok{background:#e0f4e8;color:#1a6030;display:block;}
+.emsg.err{background:#fce8e6;color:#9a2010;display:block;}
+/* ── Daily Controls ── */
+.daily-ctrl{background:#eef4fb;border-bottom:1px solid #c8d8ea;padding:8px 36px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.daily-ctrl label{font-size:12px;color:#1a4a7a;font-weight:600;}
+.daily-ctrl select{background:#f4f8fd;border:1.5px solid #a0bcd8;color:#1a4a7a;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
+.daily-sum td{background:#faeeda!important;font-weight:700;}
+.entry-modal{width:660px;max-width:96vw;}
 </style>
 </head>
 <body>
@@ -85,6 +111,7 @@ tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
     <p>Line WA · Line WB · Line WN &nbsp;|&nbsp; BCM = Bank Cubic Meters (หน่วยปริมาตรดินที่ขุด) &nbsp;|&nbsp; kWh/BCM : ค่ายิ่งต่ำ = ประหยัดพลังงานมากกว่า</p>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
+    <button class="sheet-btn" onclick="openDataEntry()">📝 กรอกข้อมูล</button>
     <button class="sheet-btn" onclick="openSettings()">🔗 เชื่อม Google Sheet</button>
     <button class="sheet-btn" onclick="loadFromSheets()" id="refreshBtn" style="display:none;">🔄 Refresh</button>
     <div class="header-badge" id="lastUpdate">อัปเดต: มิถุนายน 2569</div>
@@ -121,6 +148,7 @@ tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
   <div class="sec-tabs">
     <button id="tabProd" class="sec-tab active" onclick="setSection('prod',this)">🏭 Production &amp; Downtime</button>
     <button id="tabElec" class="sec-tab elec" onclick="setSection('elec',this)">⚡ Electricity &amp; Energy</button>
+    <button id="tabDaily" class="sec-tab daily-tab" onclick="setSection('daily',this)">📅 รายวัน</button>
   </div>
 </div>
 
@@ -229,6 +257,44 @@ tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
 
 </div><!-- end elecSection -->
 
+<!-- ════════════ DAILY SECTION ════════════ -->
+<div id="dailySection" style="display:none">
+<div class="sec-hdr" style="background:#1a4a7a;">📅 รายละเอียดรายวัน — Production &amp; Electricity Monitor</div>
+<div class="daily-ctrl">
+  <label>ปี :</label>
+  <select id="dailyYear" onchange="renderDailySection()">
+    <option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option>
+  </select>
+  <label>เดือน :</label>
+  <select id="dailyMonth" onchange="renderDailySection()">
+    <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
+    <option value="4">เมษายน</option><option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
+    <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option><option value="9">กันยายน</option>
+    <option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+  </select>
+  <span id="dailyNote" style="font-size:11px;color:#3a6090;"></span>
+  <button class="sheet-btn" style="margin-left:auto;border-color:#3a70a0;background:#d8eaf8;color:#1a3a6a;" onclick="loadDailyData()">🔄 โหลดข้อมูลรายวัน</button>
+</div>
+<div class="section" style="padding-top:16px;">
+  <div class="chart-card mb12">
+    <h3 id="dailyTitle">📅 รายละเอียดรายวัน</h3><br>
+    <div class="table-wrap">
+      <table>
+        <thead><tr>
+          <th>วันที่</th>
+          <th>BCM (ผลผลิต)</th>
+          <th>kWh (พลังงาน)</th>
+          <th>ชั่วโมงทำงาน</th>
+          <th>kWh / BCM</th>
+          <th>BCM / ชม.</th>
+        </tr></thead>
+        <tbody id="dailyBody"><tr><td colspan="6" style="text-align:center;color:#a07030;padding:24px;">กด <b>📝 กรอกข้อมูล</b> เพื่อเพิ่มข้อมูลรายวัน หรือกด <b>🔄 โหลดข้อมูลรายวัน</b> หากเชื่อม Google Sheet ไว้แล้ว</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div><!-- end dailySection -->
+
 <div class="footer">Production &amp; Electricity Dashboard · Line WA / WB / WN · ข้อมูลปี 2021–2025</div>
 
 <!-- ════ SETTINGS MODAL ════ -->
@@ -265,9 +331,130 @@ tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
       </div>
     </div>
 
+    <div style="margin-top:18px;padding-top:14px;border-top:2px solid #f0d8a0;">
+      <b style="font-size:12px;color:#1a4a7a;">📅 ข้อมูลรายวัน (Daily Data Sheets)</b>
+      <p style="font-size:11px;color:#a07030;margin:6px 0 8px;line-height:1.6;">เพิ่ม Sheet ชื่อ <b>WA_daily</b>, <b>WB_daily</b>, <b>WN_daily</b> ในไฟล์ Google Sheet เดิม<br>คอลัมน์: <code>year, month, day, bcm, kwh, wh</code> → Publish to web แบบ CSV แล้ววางลิงก์ด้านล่าง</p>
+      <div class="modal-line">
+        <span class="modal-line-badge" style="background:#1a4a7a;">WA Daily</span>
+        <div style="flex:1"><input id="urlWAdaily" type="url" placeholder="CSV URL ของ sheet WA_daily" /></div>
+      </div>
+      <div class="modal-line">
+        <span class="modal-line-badge" style="background:#1a4a7a;">WB Daily</span>
+        <div style="flex:1"><input id="urlWBdaily" type="url" placeholder="CSV URL ของ sheet WB_daily" /></div>
+      </div>
+      <div class="modal-line">
+        <span class="modal-line-badge" style="background:#1a4a7a;">WN Daily</span>
+        <div style="flex:1"><input id="urlWNdaily" type="url" placeholder="CSV URL ของ sheet WN_daily" /></div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px;padding-top:14px;border-top:2px solid #f0d8a0;">
+      <b style="font-size:12px;color:#1a5c3a;">📝 Google Apps Script URL (สำหรับกรอกข้อมูล)</b>
+      <p style="font-size:11px;color:#a07030;margin:6px 0 8px;line-height:1.6;">Deploy Google Apps Script เป็น Web App แล้ววาง URL ที่นี่<br>เพื่อให้ปุ่ม <b>📝 กรอกข้อมูล</b> ส่งข้อมูลเข้า Google Sheet ได้โดยตรง</p>
+      <input id="urlScript" type="url" placeholder="https://script.google.com/macros/s/AKfy.../exec" />
+    </div>
+
     <div class="modal-actions">
       <button class="btn-ghost" onclick="closeSettings()">ยกเลิก</button>
       <button class="btn-primary" onclick="saveAndLoad()">💾 บันทึก &amp; โหลดข้อมูล</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ DATA ENTRY MODAL ════ -->
+<div class="modal-overlay" id="dataEntryModal">
+  <div class="modal entry-modal">
+    <h2>📝 กรอกข้อมูลใหม่</h2>
+    <p>กรอกข้อมูลแล้วกด <b>บันทึก</b> ระบบส่งข้อมูลเข้า Google Sheet ทันที</p>
+
+    <div class="mtabs">
+      <button class="mtab active" onclick="setEntryTab('monthly',this)">📊 ข้อมูลรายเดือน</button>
+      <button class="mtab" onclick="setEntryTab('daily',this)">📅 ข้อมูลรายวัน</button>
+    </div>
+
+    <!-- ── Monthly Tab ── -->
+    <div class="mtab-pane active" id="entryMonthly">
+      <div class="form-row">
+        <div class="fg">
+          <label>Line *</label>
+          <select id="eLineM"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
+        </div>
+        <div class="fg">
+          <label>ปี (ค.ศ.) *</label>
+          <input id="eYearM" type="number" min="2020" max="2035" placeholder="2025">
+        </div>
+        <div class="fg">
+          <label>เดือน *</label>
+          <select id="eMonthM">
+            <option value="1">1 — มกราคม</option><option value="2">2 — กุมภาพันธ์</option><option value="3">3 — มีนาคม</option>
+            <option value="4">4 — เมษายน</option><option value="5">5 — พฤษภาคม</option><option value="6">6 — มิถุนายน</option>
+            <option value="7">7 — กรกฎาคม</option><option value="8">8 — สิงหาคม</option><option value="9">9 — กันยายน</option>
+            <option value="10">10 — ตุลาคม</option><option value="11">11 — พฤศจิกายน</option><option value="12">12 — ธันวาคม</option>
+          </select>
+        </div>
+        <div class="fg"></div>
+      </div>
+
+      <div class="section-lbl">🏭 Production</div>
+      <div class="form-row">
+        <div class="fg"><label>Plan BCM *</label><input id="ePlanBCM" type="number" placeholder="เช่น 2449116"></div>
+        <div class="fg"><label>Actual BCM *</label><input id="eActualBCM" type="number" placeholder="เช่น 2252832"></div>
+        <div class="fg"><label>WH Plan (ชั่วโมง)</label><input id="eWHPlan" type="number" step="0.1" placeholder="344"></div>
+        <div class="fg"><label>WH Actual (ชั่วโมง)</label><input id="eWHActual" type="number" step="0.1" placeholder="484.4"></div>
+      </div>
+      <div class="form-row">
+        <div class="fg"><label>kWh (พลังงานทั้งเดือน)</label><input id="eKWH" type="number" placeholder="เช่น 17706530"></div>
+        <div class="fg"></div>
+      </div>
+
+      <div class="section-lbl">⚙️ Activity (จำนวนวัน)</div>
+      <div class="form-row-4">
+        <div class="fg"><label>วัน RUN</label><input id="eDayRun" type="number" min="0" placeholder="18"></div>
+        <div class="fg"><label>วัน PM/DPM</label><input id="eDayPM" type="number" min="0" placeholder="8"></div>
+        <div class="fg"><label>วัน SHIFT</label><input id="eDayShift" type="number" min="0" placeholder="0"></div>
+        <div class="fg"><label>วัน Stand By</label><input id="eDaySB" type="number" min="0" placeholder="5"></div>
+      </div>
+      <div class="emsg" id="entryMsgM"></div>
+    </div>
+
+    <!-- ── Daily Tab ── -->
+    <div class="mtab-pane" id="entryDaily">
+      <div class="form-row">
+        <div class="fg">
+          <label>Line *</label>
+          <select id="eLineD"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
+        </div>
+        <div class="fg">
+          <label>ปี (ค.ศ.) *</label>
+          <input id="eYearD" type="number" min="2020" max="2035" placeholder="2025">
+        </div>
+        <div class="fg">
+          <label>เดือน *</label>
+          <select id="eMonthD">
+            <option value="1">1 — มกราคม</option><option value="2">2 — กุมภาพันธ์</option><option value="3">3 — มีนาคม</option>
+            <option value="4">4 — เมษายน</option><option value="5">5 — พฤษภาคม</option><option value="6">6 — มิถุนายน</option>
+            <option value="7">7 — กรกฎาคม</option><option value="8">8 — สิงหาคม</option><option value="9">9 — กันยายน</option>
+            <option value="10">10 — ตุลาคม</option><option value="11">11 — พฤศจิกายน</option><option value="12">12 — ธันวาคม</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>วันที่ *</label>
+          <input id="eDayD" type="number" min="1" max="31" placeholder="1–31">
+        </div>
+      </div>
+      <div class="section-lbl">📊 ข้อมูลประจำวัน</div>
+      <div class="form-row">
+        <div class="fg"><label>BCM (ผลผลิตวันนี้)</label><input id="eBCM" type="number" step="1" placeholder="เช่น 75000"></div>
+        <div class="fg"><label>kWh (พลังงานวันนี้)</label><input id="eKWHD" type="number" step="1" placeholder="เช่น 590000"></div>
+        <div class="fg"><label>Working Hours (ชั่วโมง)</label><input id="eWHD" type="number" step="0.1" placeholder="เช่น 16.5"></div>
+        <div class="fg"></div>
+      </div>
+      <div class="emsg" id="entryMsgD"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeDataEntry()">ยกเลิก</button>
+      <button class="btn-primary" onclick="submitEntry()">💾 บันทึกข้อมูล</button>
     </div>
   </div>
 </div>
@@ -286,7 +473,9 @@ Chart.defaults.color = A.textMuted;
 
 let currentLine = 'WA';
 let currentSection = 'prod';
+let currentEntryTab = 'monthly';
 let cProd,cDonut,cYtd,cWH,cAvail,cPM,cPower,cAnnual,cEff,cEffBar;
+const DAILY_DATA = {WA:[],WB:[],WN:[]};
 
 function setLine(line, btn) {
   currentLine = line;
@@ -299,9 +488,10 @@ function setSection(sec, btn) {
   currentSection = sec;
   document.querySelectorAll('.sec-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('prodSection').style.display = sec==='prod' ? '' : 'none';
-  document.getElementById('elecSection').style.display = sec==='elec' ? '' : 'none';
-  updateAll();
+  document.getElementById('prodSection').style.display  = sec==='prod'  ? '' : 'none';
+  document.getElementById('elecSection').style.display  = sec==='elec'  ? '' : 'none';
+  document.getElementById('dailySection').style.display = sec==='daily' ? '' : 'none';
+  if(sec==='daily') renderDailySection(); else updateAll();
 }
 function getView(){ return document.getElementById('viewSelect').value; }
 function getYear(){ return document.getElementById('yearSelect').value; }
@@ -569,6 +759,7 @@ function renderAvail(d){
   });
 }
 
+
 /* ─── PM TREND ─── */
 function renderPMTrend(d){
   if(cPM)cPM.destroy();
@@ -602,18 +793,15 @@ function renderProdTable(d){
 /* ─── ELECTRICITY KPI ─── */
 function renderElecKPI(d){
   const tKWH=d.reduce((s,r)=>s+r.kwh,0);
-  const tPA=d.reduce((s,r)=>s+r.pa,0);
-  const avg=tPA>0?(tKWH/tPA).toFixed(2):0;
-  const diff=(avg-BASELINE).toFixed(2);
-  const effs=d.filter(r=>r.eff>0).map(r=>r.eff);
-  const minE=effs.length?Math.min(...effs).toFixed(2):'-';
-  const maxE=effs.length?Math.max(...effs).toFixed(2):'-';
+  const tBCM=d.reduce((s,r)=>s+r.pa,0);
+  const avgEff=tBCM>0?(tKWH/tBCM).toFixed(2):0;
+  const effVsBase=tBCM>0?(parseFloat(avgEff)-BASELINE).toFixed(2):0;
   const cards=[
-    {top:A.amber3, lbl:'Power Consumption รวม', val:N(Math.round(tKWH/1e6*10)/10), sub:`ล้าน kWh (${N(Math.round(tKWH/1000))} MWh)`},
-    {top:avg<=7?A.green:avg<=9?A.amber3:A.red, lbl:'kWh / BCM เฉลี่ย', val:`${avg}`, cls:avg<=7?'pos':avg<=9?'neu':'neg', sub:'kWh ต่อดิน 1 BCM | ดี ≤7 | เตือน 7–9 | วิกฤต >9'},
-    {top:A.red, lbl:'สูงกว่า Baseline', val:`+${diff}`, cls:'neg', sub:`Baseline 5.89 = ค่าออกแบบตอนเริ่มต้น | สูงกว่า ${diff} kWh/BCM`},
-    {top:A.green, lbl:'kWh/BCM ดีที่สุด', val:`${minE}`, cls:'pos', sub:'เดือนที่ประหยัดพลังงานมากที่สุด'},
-    {top:A.red, lbl:'kWh/BCM แย่ที่สุด', val:`${maxE}`, cls:'neg', sub:'เดือนที่ใช้ไฟสูงสุด — ควรตรวจสอบ'},
+    {top:A.amber3,lbl:'พลังงานรวม (MWh)',val:N(Math.round(tKWH/1000)),sub:`${(tKWH/1e9).toFixed(2)} GWh | ${d.length} เดือน`},
+    {top:parseFloat(avgEff)<=7?A.green:parseFloat(avgEff)<=9?A.amber3:A.red,lbl:'kWh / BCM เฉลี่ย',val:avgEff,cls:parseFloat(avgEff)<=7?'pos':parseFloat(avgEff)<=9?'neu':'neg',sub:parseFloat(avgEff)<=7?'🟢 ประหยัดพลังงาน':parseFloat(avgEff)<=9?'🟡 เฝ้าระวัง':'🔴 วิกฤต ต้องปรับปรุง'},
+    {top:parseFloat(effVsBase)<=0?A.green:A.red,lbl:'เทียบ Baseline (5.89)',val:(parseFloat(effVsBase)>=0?'+':'')+effVsBase,cls:parseFloat(effVsBase)<=0?'pos':'neg',sub:parseFloat(effVsBase)<=0?'✅ ดีกว่า Baseline':'❌ แย่กว่า Baseline'},
+    {top:A.amber3,lbl:'Production Actual',val:N(Math.round(tBCM/1e6*10)/10),sub:'ล้าน BCM ในช่วงที่เลือก'},
+    {top:A.amber3,lbl:'เดือนที่ดีที่สุด (kWh/BCM)',val:d.length>0?Math.min(...d.filter(r=>r.pa>0).map(r=>r.eff)).toFixed(2):'-',sub:'ค่าต่ำสุดในช่วงที่เลือก = ประหยัดที่สุด'},
   ];
   document.getElementById('elecKPI').innerHTML=cards.map(c=>`<div class="kpi-card" style="--top:${c.top}"><div class="lbl">${c.lbl}</div><div class="val ${c.cls||''}">${c.val}</div><div class="sub">${c.sub}</div></div>`).join('');
 }
@@ -623,134 +811,145 @@ function renderPower(d){
   if(cPower)cPower.destroy();
   cPower=new Chart(document.getElementById('powerChart'),{
     type:'bar',
-    data:{labels:labels(d),datasets:[{label:'Power (MWh)',data:d.map(r=>Math.round(r.kwh/1000)),backgroundColor:'#ef9f2788',borderColor:'#ba7517',borderWidth:1.5,borderRadius:4}]},
+    data:{labels:labels(d),datasets:[
+      {label:'พลังงาน (MWh)',data:d.map(r=>Math.round(r.kwh/1000)),backgroundColor:'#4a309066',borderColor:'#4a3090',borderWidth:1.5,borderRadius:4}
+    ]},
     options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks},title:{display:true,text:'MWh',color:A.textMuted,font:{size:10}}}}}
+      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v+' MWh'},title:{display:true,text:'MWh',color:A.textMuted,font:{size:10}}}}}
   });
 }
 
 /* ─── ANNUAL BAR ─── */
 function renderAnnual(){
+  if(cAnnual)cAnnual.destroy();
   const lines=currentLine==='ALL'?['WA','WB','WN']:[currentLine];
   const all=mergeLines(lines,'all');
   const agg={};
-  all.forEach(r=>{if(!agg[r.y])agg[r.y]={pa:0,kwh:0};agg[r.y].pa+=r.pa;agg[r.y].kwh+=r.kwh;});
+  all.forEach(r=>{if(!agg[r.y])agg[r.y]={kwh:0,pa:0};agg[r.y].kwh+=r.kwh;agg[r.y].pa+=r.pa;});
   const years=Object.keys(agg).sort();
-  const vals=years.map(y=>+(agg[y].kwh/agg[y].pa).toFixed(2));
-  const YCOL={'2021':'#fac77599','2022':'#ba751799','2023':'#854f0b99','2024':'#ef9f2799','2025':'#d9621099'};
-  if(cAnnual)cAnnual.destroy();
+  const effs=years.map(y=>agg[y].pa>0?+(agg[y].kwh/agg[y].pa).toFixed(2):0);
+  const effColors=effs.map(v=>v<=7?'#2a7a4088':v<=9?'#ba751788':'#c0302088');
+  const effBorders=effs.map(v=>v<=7?'#2a7a40':v<=9?'#ba7517':'#c03020');
   cAnnual=new Chart(document.getElementById('annualBar'),{
+    type:'bar',
     data:{labels:years,datasets:[
-      {type:'bar',label:'kWh/BCM เฉลี่ยรายปี',data:vals,backgroundColor:years.map(y=>YCOL[y]||'#ba751799'),borderColor:years.map(()=>'#854f0b'),borderWidth:2,borderRadius:6},
-      {type:'line',label:`Baseline (${BASELINE})`,data:years.map(()=>BASELINE),borderColor:'#2a7a4099',borderDash:[5,4],borderWidth:1.5,pointRadius:0}
+      {label:'kWh/BCM เฉลี่ยรายปี',data:effs,backgroundColor:effColors,borderColor:effBorders,borderWidth:1.5,borderRadius:6},
+      {label:`Baseline ${BASELINE}`,data:years.map(()=>BASELINE),type:'line',borderColor:'#c0303088',borderDash:[6,4],borderWidth:2,pointRadius:0}
     ]},
     options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
-      scales:{x:{...gridOpts},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v+' kWh'},min:5,max:12}}}
+      scales:{x:{...gridOpts},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v.toFixed(1)},title:{display:true,text:'kWh/BCM',color:A.textMuted,font:{size:10}},min:4,max:12}}}
   });
 }
 
-/* ─── EFF TREND + ROLLING AVG ─── */
+/* ─── EFF TREND ─── */
 function renderEff(d){
   if(cEff)cEff.destroy();
-  const effs=d.map(r=>r.eff>0?r.eff:null);
-  const rolling=effs.map((v,i)=>{
-    const window=effs.slice(Math.max(0,i-2),i+1).filter(x=>x!=null);
-    return window.length>0?+(window.reduce((a,b)=>a+b,0)/window.length).toFixed(2):null;
+  const effData=d.map(r=>r.pa>0?r.eff:null);
+  const ptCol=effData.map(v=>v==null?A.gray:v<=7?A.green:v<=9?A.amber3:A.red);
+  const roll=effData.map((_,i,arr)=>{
+    const vals=arr.slice(Math.max(0,i-2),i+1).filter(v=>v!=null);
+    return vals.length>0?+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):null;
   });
   cEff=new Chart(document.getElementById('effChart'),{
-    type:'line',
     data:{labels:labels(d),datasets:[
-      {label:'kWh/BCM รายเดือน',data:effs,borderColor:A.amber3,backgroundColor:'#ef9f2715',fill:true,tension:0.35,pointRadius:3,pointBackgroundColor:A.amber3,borderWidth:2},
-      {label:'3-Month Rolling Avg',data:rolling,borderColor:'#1a7a6a',borderWidth:2.5,pointRadius:0,tension:0.4,fill:false,borderDash:[3,2]},
-      {label:`Baseline (${BASELINE})`,data:d.map(()=>BASELINE),borderColor:'#2a7a4099',borderDash:[6,4],borderWidth:1.5,pointRadius:0}
+      {type:'line',label:'kWh/BCM รายเดือน',data:effData,borderColor:'#4a3090',backgroundColor:'#4a309015',fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:ptCol,pointBorderColor:ptCol,borderWidth:2},
+      {type:'line',label:'3-Month Rolling Avg',data:roll,borderColor:A.amber3,borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false},
+      {type:'line',label:`Baseline ${BASELINE}`,data:d.map(()=>BASELINE),borderColor:'#c0303066',borderDash:[8,4],borderWidth:1.5,pointRadius:0,fill:false}
     ]},
-    options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v+' kWh'},min:4,max:13}}}
+    options:{responsive:true,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{color:A.amber4,font:{size:10}}},
+        tooltip:{callbacks:{label:ctx=>ctx.parsed.y!=null?` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`:null}}},
+      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v.toFixed(1)},title:{display:true,text:'kWh/BCM',color:A.textMuted,font:{size:10}},min:4,max:12}}}
   });
 }
 
-/* ─── EFF STATUS BAR ─── */
+/* ─── EFF BAR ─── */
 function renderEffBar(d){
   if(cEffBar)cEffBar.destroy();
-  const bgs=d.map(r=>r.eff<=7?'#2a7a4099':r.eff<=9?'#ef9f2799':'#c0302099');
-  const bds=d.map(r=>r.eff<=7?'#2a7a40':r.eff<=9?'#ba7517':'#c03020');
+  const effData=d.map(r=>r.pa>0?r.eff:null);
+  const effColors=effData.map(v=>v==null?A.gray+'44':v<=7?'#2a7a4066':v<=9?'#ba751766':'#c0302066');
+  const effBorders=effData.map(v=>v==null?A.gray:v<=7?A.green:v<=9?A.amber3:A.red);
   cEffBar=new Chart(document.getElementById('effBarChart'),{
     type:'bar',
     data:{labels:labels(d),datasets:[
-      {label:'kWh/BCM',data:d.map(r=>r.eff>0?r.eff:null),backgroundColor:bgs,borderColor:bds,borderWidth:1.5,borderRadius:3},
-      {type:'line',label:`Baseline`,data:d.map(()=>BASELINE),borderColor:'#2a7a40cc',borderDash:[6,4],borderWidth:2,pointRadius:0,fill:false}
+      {label:'kWh/BCM',data:effData,backgroundColor:effColors,borderColor:effBorders,borderWidth:1.5,borderRadius:4},
+      {label:'Target 7',data:d.map(()=>7),type:'line',borderColor:'#2a7a4066',borderDash:[6,4],borderWidth:1.5,pointRadius:0},
+      {label:'Target 9',data:d.map(()=>9),type:'line',borderColor:'#c0302066',borderDash:[6,4],borderWidth:1.5,pointRadius:0}
     ]},
-    options:{responsive:true,plugins:{legend:{display:false},
-      tooltip:{callbacks:{label:ctx=>{if(ctx.datasetIndex===1)return null;const v=ctx.parsed.y;const s=v<=7?'🟢 ดี':v<=9?'🟡 เฝ้าระวัง':'🔴 วิกฤต';return ` ${s} — ${v.toFixed(2)} kWh/BCM`;}}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,min:4,max:13,ticks:{...gridOpts.ticks,callback:v=>v+' kWh'},title:{display:true,text:'kWh/BCM',color:A.textMuted,font:{size:10}}}}}
+    options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
+      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v.toFixed(1)},title:{display:true,text:'kWh/BCM',color:A.textMuted,font:{size:10}},min:4,max:12}}}
   });
 }
 
 /* ─── ELECTRICITY TABLE ─── */
 function renderElecTable(d){
-  document.getElementById('elecBody').innerHTML=d.map((r,i)=>{
+  let prev=null;
+  document.getElementById('elecBody').innerHTML=d.map(r=>{
     const lbl=getView()==='annual'?r.y:`${MTH[r.m]} ${r.y}`;
-    const diff=(r.eff-BASELINE).toFixed(2);
-    const cls=r.eff<=6.5?'bg':r.eff<=8.5?'by':'br';
-    let yoy='-';
-    if(getView()==='monthly'){
-      const lines=currentLine==='ALL'?['WA','WB','WN']:[currentLine];
-      const all=mergeLines(lines,'all');
-      const prev=all.find(x=>x.y===r.y-1&&x.m===r.m);
-      if(prev&&prev.eff>0){const pct=((r.eff-prev.eff)/prev.eff*100).toFixed(1);yoy=`<span class="${pct>0?'neg2':'pos2'}">${pct>0?'+':''}${pct}%</span>`;}
-    }
-    return `<tr><td class="mc">${lbl}</td><td>${N(r.pa)}</td><td>${N(Math.round(r.kwh/1000))}</td><td><b>${r.eff>0?r.eff:'-'}</b></td><td><span class="badge ${cls}">+${diff}</span></td><td>${yoy}</td></tr>`;
+    const mwh=Math.round(r.kwh/1000);
+    const eff=r.pa>0?r.eff.toFixed(2):'-';
+    const vsBase=r.pa>0?(r.eff-BASELINE).toFixed(2):'-';
+    const vsCls=r.pa>0?r.eff<=BASELINE?'pos2':'neg2':'';
+    const vsSign=r.pa>0?(r.eff-BASELINE)>=0?'+':'':'';
+    let yoy='-', yoyCls='';
+    if(prev&&r.pa>0&&prev.pa>0){const diff=r.eff-prev.eff;yoy=(diff>=0?'+':'')+diff.toFixed(2);yoyCls=diff<=0?'pos2':'neg2';}
+    prev=r;
+    return `<tr><td class="mc">${lbl}</td><td>${N(Math.round(r.pa))}</td><td>${N(mwh)} MWh</td><td>${eff}</td><td class="${vsCls}">${vsSign}${vsBase}</td><td class="${yoyCls}">${yoy}</td></tr>`;
   }).join('');
 }
 
-/* ════════════ GOOGLE SHEETS INTEGRATION ════════════ */
-
+/* ════════════ SETTINGS ════════════ */
 function openSettings(){
-  document.getElementById('urlWA').value = localStorage.getItem('sheetUrl_WA')||'';
-  document.getElementById('urlWB').value = localStorage.getItem('sheetUrl_WB')||'';
-  document.getElementById('urlWN').value = localStorage.getItem('sheetUrl_WN')||'';
+  document.getElementById('urlWA').value=localStorage.getItem('sheetUrl_WA')||'';
+  document.getElementById('urlWB').value=localStorage.getItem('sheetUrl_WB')||'';
+  document.getElementById('urlWN').value=localStorage.getItem('sheetUrl_WN')||'';
+  document.getElementById('urlWAdaily').value=localStorage.getItem('sheetUrl_WA_daily')||'';
+  document.getElementById('urlWBdaily').value=localStorage.getItem('sheetUrl_WB_daily')||'';
+  document.getElementById('urlWNdaily').value=localStorage.getItem('sheetUrl_WN_daily')||'';
+  document.getElementById('urlScript').value=localStorage.getItem('scriptUrl')||'';
   document.getElementById('settingsModal').classList.add('open');
 }
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('open'); }
 
 function saveAndLoad(){
   ['WA','WB','WN'].forEach(l=>{
-    const v = document.getElementById('url'+l).value.trim();
-    if(v) localStorage.setItem('sheetUrl_'+l, v);
-    else localStorage.removeItem('sheetUrl_'+l);
+    const url=document.getElementById('url'+l).value.trim();
+    if(url) localStorage.setItem('sheetUrl_'+l,url);
+    const urlD=document.getElementById('url'+l+'daily').value.trim();
+    if(urlD) localStorage.setItem('sheetUrl_'+l+'_daily',urlD);
   });
+  const sc=document.getElementById('urlScript').value.trim();
+  if(sc) localStorage.setItem('scriptUrl',sc);
   closeSettings();
   loadFromSheets();
+  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l+'_daily'))){
+    loadDailyData();
+  }
 }
 
+/* ════════════ CSV PARSER ════════════ */
 function parseCSV(text){
-  const lines = text.trim().split(/\r?\n/);
-  if(lines.length < 2) return [];
-  const hdr = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase()
-    .replace(/\s+/g,'_').replace(/\//g,'_'));
+  const lines=text.trim().split(/\r?\n/);
+  if(lines.length<2) return [];
+  const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
   return lines.slice(1).map(line=>{
-    /* handle quoted fields with commas inside */
     const vals=[]; let cur='', inQ=false;
     for(const ch of line){
-      if(ch==='"'){ inQ=!inQ; }
-      else if(ch===','&&!inQ){ vals.push(cur.trim()); cur=''; }
+      if(ch==='"'){inQ=!inQ;}
+      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
       else cur+=ch;
     }
     vals.push(cur.trim());
-    const obj={};
-    hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
-    const pp=parseFloat(obj['plan_bcm']||obj['pp'])||0;
-    const pa=parseFloat(obj['actual_bcm']||obj['pa'])||0;
-    const kwh=parseFloat(obj['kwh'])||0;
+    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
     return {
       y:parseInt(obj['year']||obj['y'])||0,
       m:parseInt(obj['month']||obj['m'])||0,
-      pp, pa,
+      pp:parseFloat(obj['plan_bcm']||obj['pp'])||0,
+      pa:parseFloat(obj['actual_bcm']||obj['pa'])||0,
       wp:parseFloat(obj['wh_plan']||obj['wp'])||0,
       wa:parseFloat(obj['wh_actual']||obj['wa'])||0,
-      kwh,
-      eff:pa>0?+(kwh/pa).toFixed(2):(parseFloat(obj['kwh_per_bcm']||obj['eff'])||0),
-      ach:pp>0?+(pa/pp*100).toFixed(1):0,
+      kwh:parseFloat(obj['kwh'])||0,
+      eff:0, ach:0,
       run:parseInt(obj['days_run']||obj['run'])||0,
       pm:parseInt(obj['days_pm']||obj['pm'])||0,
       sh:parseInt(obj['days_shift']||obj['sh'])||0,
@@ -759,6 +958,7 @@ function parseCSV(text){
   }).filter(r=>r.y>2000&&r.m>=1&&r.m<=12&&(r.pp>0||r.pa>0));
 }
 
+/* ════════════ LOAD FROM SHEETS ════════════ */
 async function loadFromSheets(){
   const lines=['WA','WB','WN'];
   const urls=lines.map(l=>localStorage.getItem('sheetUrl_'+l));
@@ -783,7 +983,6 @@ async function loadFromSheets(){
     } catch(e){ failed.push(`${l} (${e.message})`); }
   }));
 
-  /* update year dropdown to match new data */
   const years=[...new Set(Object.values(DATA).flat().map(r=>r.y))].sort();
   const ys=document.getElementById('yearSelect');
   const cur=ys.value;
@@ -803,10 +1002,185 @@ async function loadFromSheets(){
   }
 }
 
+/* ════════════ DATA ENTRY ════════════ */
+function openDataEntry(){
+  const now = new Date();
+  document.getElementById('eYearM').value = now.getFullYear();
+  document.getElementById('eMonthM').value = now.getMonth()+1;
+  document.getElementById('eYearD').value = now.getFullYear();
+  document.getElementById('eMonthD').value = now.getMonth()+1;
+  const ln = currentLine==='ALL'?'WA':currentLine;
+  document.getElementById('eLineM').value = ln;
+  document.getElementById('eLineD').value = ln;
+  document.getElementById('dataEntryModal').classList.add('open');
+}
+function closeDataEntry(){ document.getElementById('dataEntryModal').classList.remove('open'); }
+
+function setEntryTab(tab, btn){
+  currentEntryTab = tab;
+  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('entryMonthly').classList.toggle('active', tab==='monthly');
+  document.getElementById('entryDaily').classList.toggle('active', tab==='daily');
+}
+
+async function submitEntry(){
+  const scriptUrl = localStorage.getItem('scriptUrl');
+  if(!scriptUrl){
+    alert('⚠️ ยังไม่ได้ตั้งค่า Google Apps Script URL\n\nไปที่ 🔗 เชื่อม Google Sheet → ช่อง "Google Apps Script URL" แล้วกรอก URL ที่ได้จากการ Deploy');
+    return;
+  }
+  if(currentEntryTab==='monthly') await submitMonthlyEntry(scriptUrl);
+  else await submitDailyEntry(scriptUrl);
+}
+
+async function submitMonthlyEntry(scriptUrl){
+  const msg = document.getElementById('entryMsgM');
+  const data = {
+    type:'monthly',
+    line: document.getElementById('eLineM').value,
+    year: parseInt(document.getElementById('eYearM').value)||0,
+    month: parseInt(document.getElementById('eMonthM').value)||0,
+    plan_bcm: parseFloat(document.getElementById('ePlanBCM').value)||0,
+    actual_bcm: parseFloat(document.getElementById('eActualBCM').value)||0,
+    wh_plan: parseFloat(document.getElementById('eWHPlan').value)||0,
+    wh_actual: parseFloat(document.getElementById('eWHActual').value)||0,
+    kwh: parseFloat(document.getElementById('eKWH').value)||0,
+    days_run: parseInt(document.getElementById('eDayRun').value)||0,
+    days_pm: parseInt(document.getElementById('eDayPM').value)||0,
+    days_shift: parseInt(document.getElementById('eDayShift').value)||0,
+    days_standby: parseInt(document.getElementById('eDaySB').value)||0
+  };
+  if(!data.year||!data.month||!data.plan_bcm||!data.actual_bcm){
+    msg.className='emsg err'; msg.textContent='⚠️ กรุณากรอก ปี, เดือน, Plan BCM และ Actual BCM ให้ครบ'; return;
+  }
+  msg.className='emsg'; msg.style.display='block'; msg.textContent='⏳ กำลังบันทึก…';
+  try {
+    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
+    msg.className='emsg ok'; msg.textContent='✅ บันทึกสำเร็จ! ข้อมูลเดือน '+MTH[data.month]+' '+data.year+' Line '+data.line+' เข้า Google Sheet แล้ว';
+    ['ePlanBCM','eActualBCM','eWHPlan','eWHActual','eKWH','eDayRun','eDayPM','eDayShift','eDaySB'].forEach(id=>document.getElementById(id).value='');
+  } catch(e){ msg.className='emsg err'; msg.textContent='❌ Error: '+e.message; }
+}
+
+async function submitDailyEntry(scriptUrl){
+  const msg = document.getElementById('entryMsgD');
+  const data = {
+    type:'daily',
+    line: document.getElementById('eLineD').value,
+    year: parseInt(document.getElementById('eYearD').value)||0,
+    month: parseInt(document.getElementById('eMonthD').value)||0,
+    day: parseInt(document.getElementById('eDayD').value)||0,
+    bcm: parseFloat(document.getElementById('eBCM').value)||0,
+    kwh: parseFloat(document.getElementById('eKWHD').value)||0,
+    wh: parseFloat(document.getElementById('eWHD').value)||0
+  };
+  if(!data.year||!data.month||!data.day){
+    msg.className='emsg err'; msg.textContent='⚠️ กรุณากรอก ปี, เดือน และวันที่ให้ครบ'; return;
+  }
+  msg.className='emsg'; msg.style.display='block'; msg.textContent='⏳ กำลังบันทึก…';
+  try {
+    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
+    msg.className='emsg ok'; msg.textContent='✅ บันทึกสำเร็จ! ข้อมูลวันที่ '+data.day+' '+MTH[data.month]+' '+data.year+' เข้า Google Sheet แล้ว';
+    const l = data.line;
+    DAILY_DATA[l] = DAILY_DATA[l].filter(r=>!(r.y===data.year&&r.m===data.month&&r.d===data.day));
+    if(data.bcm||data.kwh||data.wh) DAILY_DATA[l].push({y:data.year,m:data.month,d:data.day,bcm:data.bcm,kwh:data.kwh,wh:data.wh});
+    ['eDayD','eBCM','eKWHD','eWHD'].forEach(id=>document.getElementById(id).value='');
+    if(currentSection==='daily') renderDailySection();
+  } catch(e){ msg.className='emsg err'; msg.textContent='❌ Error: '+e.message; }
+}
+
+/* ════════════ DAILY TABLE ════════════ */
+function parseDailyCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  if(lines.length<2) return [];
+  const hdr = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
+  return lines.slice(1).map(line=>{
+    const vals=[]; let cur='', inQ=false;
+    for(const ch of line){
+      if(ch==='"'){inQ=!inQ;}
+      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
+      else cur+=ch;
+    }
+    vals.push(cur.trim());
+    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
+    return {
+      y:parseInt(obj['year']||obj['y'])||0, m:parseInt(obj['month']||obj['m'])||0,
+      d:parseInt(obj['day']||obj['d'])||0, bcm:parseFloat(obj['bcm'])||0,
+      kwh:parseFloat(obj['kwh'])||0, wh:parseFloat(obj['wh'])||0
+    };
+  }).filter(r=>r.y>2000&&r.m>=1&&r.m<=12&&r.d>=1&&r.d<=31);
+}
+
+async function loadDailyData(){
+  const note = document.getElementById('dailyNote');
+  note.textContent='⏳ กำลังโหลด…';
+  let ok=[], fail=[];
+  await Promise.all(['WA','WB','WN'].map(async l=>{
+    const url = localStorage.getItem('sheetUrl_'+l+'_daily');
+    if(!url) return;
+    try{
+      const resp = await fetch(url);
+      const text = await resp.text();
+      const rows = parseDailyCSV(text);
+      DAILY_DATA[l] = rows; ok.push(l);
+    } catch(e){ fail.push(l+' ('+e.message+')'); }
+  }));
+  if(ok.length) note.textContent='✅ โหลดสำเร็จ: Line '+ok.join(', ')+(fail.length?' | ⚠️ ล้มเหลว: '+fail.join(', '):'');
+  else if(fail.length) note.textContent='❌ โหลดไม่สำเร็จ: '+fail.join(', ');
+  else note.textContent='ℹ️ ยังไม่ได้ตั้งค่า Daily Sheet URL (ไปที่ 🔗 เชื่อม Google Sheet)';
+  renderDailySection();
+}
+
+function renderDailySection(){
+  const line = currentLine==='ALL'?'WA':currentLine;
+  const year  = parseInt(document.getElementById('dailyYear').value)||2025;
+  const month = parseInt(document.getElementById('dailyMonth').value)||1;
+  const data  = (DAILY_DATA[line]||[]).filter(r=>r.y===year&&r.m===month).sort((a,b)=>a.d-b.d);
+
+  document.getElementById('dailyTitle').textContent =
+    `📅 รายละเอียดรายวัน — Line ${line} | ${MTH[month]} ${year}`;
+
+  const tbody = document.getElementById('dailyBody');
+  if(data.length===0){
+    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#a07030;padding:24px;">ไม่มีข้อมูลรายวันสำหรับ Line '+line+' '+MTH[month]+' '+year+'<br><small>กด 📝 กรอกข้อมูล หรือตั้งค่า Daily Sheet URL แล้วกด 🔄 โหลดข้อมูลรายวัน</small></td></tr>';
+    return;
+  }
+
+  let tBCM=0, tKWH=0, tWH=0;
+  const rows = data.map(r=>{
+    tBCM+=r.bcm; tKWH+=r.kwh; tWH+=r.wh;
+    const eff = r.bcm>0?(r.kwh/r.bcm).toFixed(2):'-';
+    const bhr = r.wh>0?N(Math.round(r.bcm/r.wh)):'-';
+    const effCls = r.bcm>0?(r.kwh/r.bcm)<=7?'pos2':(r.kwh/r.bcm)<=9?'neu':'neg2':'';
+    return `<tr>
+      <td class="mc">${r.d} ${MTH[r.m]}</td>
+      <td>${N(r.bcm)}</td>
+      <td>${N(Math.round(r.kwh))}</td>
+      <td>${r.wh>0?r.wh.toFixed(1):'-'}</td>
+      <td><span class="${effCls}">${eff}</span></td>
+      <td>${bhr}</td>
+    </tr>`;
+  });
+  const avgEff = tBCM>0?(tKWH/tBCM).toFixed(2):'-';
+  const avgBhr = tWH>0?N(Math.round(tBCM/tWH)):'-';
+  rows.push(`<tr class="daily-sum">
+    <td class="mc">รวม / เฉลี่ย (${data.length} วัน)</td>
+    <td>${N(Math.round(tBCM))}</td>
+    <td>${N(Math.round(tKWH))}</td>
+    <td>${tWH.toFixed(1)}</td>
+    <td>${avgEff}</td>
+    <td>${avgBhr}</td>
+  </tr>`);
+  tbody.innerHTML = rows.join('');
+}
+
 /* ── auto-load on open if URLs already saved ── */
 window.addEventListener('load', ()=>{
   if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l))){
     loadFromSheets();
+  }
+  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l+'_daily'))){
+    loadDailyData();
   }
 });
 
