@@ -1,1523 +1,262 @@
-/<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Production & Electricity Dashboard — Line WA / WB / WN</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<title>Production Dashboard Portal — Line WA / WB / WN</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',Tahoma,sans-serif;background:#faf6ef;color:#3a2a10;}
-.header{background:#633806;padding:20px 36px;display:flex;align-items:center;justify-content:space-between;}
-.header-left h1{font-size:20px;font-weight:700;color:#fff;letter-spacing:0.3px;}
-.header-left p{font-size:12px;color:#fac775;margin-top:4px;}
-.header-badge{background:#854f0b;color:#fac775;font-size:12px;padding:6px 16px;border-radius:20px;border:1px solid #fac775;white-space:nowrap;}
-.controls{background:#fff;border-bottom:1px solid #f0d8a0;padding:10px 36px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;}
-.controls label{font-size:12px;color:#854f0b;font-weight:600;}
-.controls select{background:#fffbf0;border:1px solid #f0c060;color:#633806;padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;}
-.controls select:focus{outline:none;border-color:#ba7517;}
-.line-btns{display:flex;gap:6px;}
-.line-btn{padding:5px 14px;border-radius:20px;border:1.5px solid #f0c060;background:#fffbf0;color:#854f0b;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;}
-.line-btn.active{background:#633806;color:#fac775;border-color:#633806;}
-.sec-hdr{background:#854f0b;color:#fff;padding:10px 36px;font-size:13px;font-weight:700;letter-spacing:0.6px;display:flex;align-items:center;gap:8px;}
-.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;padding:16px 36px;}
-.kpi-card{background:#fff;border:1px solid #f0d8a0;border-radius:12px;padding:16px 18px;border-top:4px solid var(--top,#ba7517);box-shadow:0 1px 4px rgba(180,120,20,.08);}
-.kpi-card .lbl{font-size:10px;color:#a07030;text-transform:uppercase;letter-spacing:.8px;font-weight:600;}
-.kpi-card .val{font-size:26px;font-weight:700;color:#3a2008;margin:6px 0 3px;line-height:1;}
-.kpi-card .sub{font-size:10px;color:#b08040;line-height:1.4;}
-.pos{color:#2a7a40!important;} .neg{color:#c03020!important;} .neu{color:#ba7517!important;}
-.section{padding:0 36px 16px;}
-.row2{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:12px;}
-.row2eq{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
-.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;}
-.chart-card{background:#fff;border:1px solid #f0d8a0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(180,120,20,.06);margin-bottom:0;}
-.chart-card h3{font-size:11px;font-weight:700;color:#854f0b;text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f5e0b0;}
-.chart-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid #f5e0b0;}
-.chart-hdr h3{font-size:11px;font-weight:700;color:#854f0b;text-transform:uppercase;letter-spacing:.6px;margin:0;border:none;padding:0;}
-.chart-sel{background:#fffbf0;border:1px solid #f0c060;color:#633806;padding:3px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600;}
-.mb12{margin-bottom:12px;}
-.table-wrap{overflow-x:auto;}
-table{width:100%;border-collapse:collapse;font-size:11px;}
-thead th{background:#faeeda;color:#854f0b;padding:8px 10px;text-align:center;font-weight:700;border-bottom:2px solid #f0c060;white-space:nowrap;}
-thead th:first-child{text-align:left;}
-tbody tr{border-bottom:1px solid #f5ead0;}
-tbody tr:hover{background:#fffbf0;}
-tbody td{padding:7px 10px;text-align:center;color:#4a3010;}
-tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
-.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;}
-.bg{background:#e0f4e8;color:#1a6030;} .by{background:#fef3d0;color:#8a5c00;} .br{background:#fce8e6;color:#9a2010;}
-.pos2{color:#2a7a40;font-weight:600;} .neg2{color:#c03020;font-weight:600;}
-.footer{text-align:center;padding:16px;color:#c09050;font-size:11px;border-top:1px solid #f0d8a0;background:#fff;margin-top:8px;}
-.sec-tabs{display:flex;gap:4px;margin-left:auto;}
-.sec-tab{padding:5px 18px;border-radius:20px;border:1.5px solid #f0c060;background:#fffbf0;color:#854f0b;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;}
-.sec-tab.active{background:#1a5c3a;color:#a0f0d0;border-color:#1a5c3a;}
-.sec-tab.active.elec{background:#4a3090;color:#c8b8ff;border-color:#4a3090;}
-.ctrl-sep{width:1px;height:20px;background:#f0d8a0;align-self:center;margin:0 4px;}
-.sheet-btn{padding:5px 14px;border-radius:20px;border:1.5px solid #4a7a30;background:#e8f5e0;color:#2a5a10;font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;}
-.sheet-btn:hover{background:#2a5a10;color:#fff;}
-.sheet-status{font-size:10px;color:#6a9a50;font-weight:600;white-space:nowrap;}
-.sheet-status.err{color:#c03020;}
-/* ── Modal ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:#00000066;z-index:1000;align-items:center;justify-content:center;}
-.modal-overlay.open{display:flex;}
-.modal{background:#fff;border-radius:16px;padding:28px 32px;width:560px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.18);}
-.modal h2{font-size:16px;font-weight:700;color:#633806;margin-bottom:6px;}
-.modal p{font-size:12px;color:#a07030;margin-bottom:18px;line-height:1.6;}
-.modal label{display:block;font-size:11px;font-weight:700;color:#854f0b;margin-bottom:4px;margin-top:12px;}
-.modal input{width:100%;padding:8px 12px;border:1.5px solid #f0c060;border-radius:8px;font-size:12px;color:#3a2008;background:#fffbf0;outline:none;}
-.modal input:focus{border-color:#ba7517;}
-.modal-line{display:flex;align-items:center;gap:8px;margin-top:10px;}
-.modal-line-badge{background:#854f0b;color:#fac775;font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;white-space:nowrap;}
-.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end;}
-.btn-primary{padding:8px 22px;border-radius:8px;border:none;background:#633806;color:#fac775;font-size:12px;font-weight:700;cursor:pointer;}
-.btn-primary:hover{background:#854f0b;}
-.btn-ghost{padding:8px 16px;border-radius:8px;border:1.5px solid #f0c060;background:#fff;color:#854f0b;font-size:12px;font-weight:700;cursor:pointer;}
-.step-box{background:#fffbf0;border:1px solid #f0d8a0;border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:11px;color:#633806;line-height:1.8;}
-.step-box b{color:#3a2008;}
-@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.row2,.row2eq,.row3{grid-template-columns:1fr;}}
-/* ── Daily Section Tab ── */
-.sec-tab.active.daily-tab{background:#1a4a7a;color:#a0c8ff;border-color:#1a4a7a;}
-/* ── Realtime Tab ── */
-.sec-tab.active.rt-tab{background:#7a1a1a;color:#ffb8a8;border-color:#7a1a1a;}
-/* ── Realtime Section ── */
-.rt-ctrl{background:#fff5f0;border-bottom:1px solid #f0c0b0;padding:8px 36px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-.rt-ctrl label{font-size:12px;color:#7a1a1a;font-weight:600;}
-.rt-ctrl input[type="date"]{background:#fff5f0;border:1.5px solid #e0a090;color:#6a1a1a;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;outline:none;}
-.machine-card{display:flex;align-items:center;gap:10px;padding:10px 14px;margin-bottom:8px;border-radius:10px;border:1.5px solid;}
-.machine-ok{background:#e0f4e8;border-color:#a0d0b0;}
-.machine-down{background:#fce8e6;border-color:#e0b0a0;}
-.machine-name{font-weight:700;font-size:13px;}
-.machine-ok .machine-name{color:#1a6030;}
-.machine-down .machine-name{color:#6a1010;}
-.machine-sub{font-size:10px;color:#888;}
-/* ── Data Entry Form ── */
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px;margin-top:8px;}
-.form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px 12px;margin-top:8px;}
-.fg{display:flex;flex-direction:column;gap:3px;}
-.fg label{font-size:11px;font-weight:700;color:#854f0b;}
-.fg input,.fg select{padding:7px 10px;border:1.5px solid #f0c060;border-radius:7px;font-size:12px;color:#3a2008;background:#fffbf0;outline:none;width:100%;}
-.fg input:focus,.fg select:focus{border-color:#ba7517;}
-.section-lbl{font-size:11px;font-weight:700;color:#854f0b;margin:14px 0 4px;padding-top:12px;border-top:1px solid #f0d8a0;}
-/* ── Modal Tabs ── */
-.mtabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #f0d8a0;}
-.mtab{padding:7px 22px;border:none;background:transparent;color:#a07030;font-size:12px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s;}
-.mtab.active{color:#633806;border-bottom-color:#633806;}
-.mtab-pane{display:none;}
-.mtab-pane.active{display:block;}
-/* ── Entry Status ── */
-.emsg{padding:8px 14px;border-radius:8px;font-size:12px;font-weight:600;margin-top:10px;display:none;}
-.emsg.ok{background:#e0f4e8;color:#1a6030;display:block;}
-.emsg.err{background:#fce8e6;color:#9a2010;display:block;}
-/* ── Daily Controls ── */
-.daily-ctrl{background:#eef4fb;border-bottom:1px solid #c8d8ea;padding:8px 36px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
-.daily-ctrl label{font-size:12px;color:#1a4a7a;font-weight:600;}
-.daily-ctrl select{background:#f4f8fd;border:1.5px solid #a0bcd8;color:#1a4a7a;padding:5px 12px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;}
-.daily-sum td{background:#faeeda!important;font-weight:700;}
-.entry-modal{width:660px;max-width:96vw;}
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --card-hover: #263349;
+  --border: #334155;
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-amber: #f59e0b;
+  --text: #f1f5f9;
+  --sub: #94a3b8;
+  --muted: #475569;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+  min-height: 100vh; overflow-x: hidden;
+}
+body::before {
+  content: ''; position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(59,130,246,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,.04) 1px, transparent 1px);
+  background-size: 40px 40px; pointer-events: none;
+}
+
+/* HEADER */
+header {
+  padding: 20px 48px; display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  background: rgba(15,23,42,.85); backdrop-filter: blur(12px);
+  position: sticky; top: 0; z-index: 50;
+}
+.logo-area { display: flex; align-items: center; gap: 14px; }
+.logo-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; box-shadow: 0 4px 16px rgba(59,130,246,.35);
+}
+.logo-text h1 { font-size: 1.05rem; font-weight: 700; }
+.logo-text p  { font-size: .74rem; color: var(--sub); margin-top: 1px; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.live-badge {
+  display: flex; align-items: center; gap: 6px; font-size: .74rem;
+  color: var(--accent-green); background: rgba(34,197,94,.1);
+  border: 1px solid rgba(34,197,94,.25); padding: 4px 12px; border-radius: 20px;
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent-green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+#headerTime { font-size: .76rem; color: var(--sub); }
+
+/* HERO */
+.hero { padding: 64px 48px 40px; text-align: center; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: .76rem; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--accent-blue);
+  background: rgba(59,130,246,.1); border: 1px solid rgba(59,130,246,.25);
+  padding: 5px 16px; border-radius: 20px; margin-bottom: 22px;
+}
+.hero h2 {
+  font-size: 2.6rem; font-weight: 800; line-height: 1.18;
+  background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; margin-bottom: 16px;
+}
+.hero p { font-size: .95rem; color: var(--sub); max-width: 480px; margin: 0 auto 40px; line-height: 1.75; }
+
+/* LINE PILLS */
+.line-pills { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 48px; }
+.pill { padding: 6px 18px; border-radius: 20px; font-size: .8rem; font-weight: 600; border: 1.5px solid; }
+.pill-wa { color: #34d399; border-color: rgba(52,211,153,.4); background: rgba(52,211,153,.08); }
+.pill-wb { color: #60a5fa; border-color: rgba(96,165,250,.4); background: rgba(96,165,250,.08); }
+.pill-wn { color: #f472b6; border-color: rgba(244,114,182,.4); background: rgba(244,114,182,.08); }
+
+/* STATS */
+.stats-row {
+  display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+  padding: 24px 48px; border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border); margin-bottom: 52px;
+}
+.stat { text-align: center; }
+.stat-v { font-size: 1.75rem; font-weight: 800; }
+.stat-l { font-size: .7rem; color: var(--sub); margin-top: 4px; text-transform: uppercase; letter-spacing: .06em; }
+
+/* CARDS */
+.cards {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 24px; max-width: 940px; margin: 0 auto; padding: 0 48px 80px;
+}
+@media (max-width: 720px) { .cards { grid-template-columns: 1fr; padding: 0 24px 60px; } }
+@media (max-width: 600px) { .hero h2 { font-size: 1.8rem; } header { padding: 16px 20px; } }
+
+.dash-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px; cursor: pointer;
+  text-decoration: none; color: inherit; display: block;
+  transition: all .22s ease; position: relative; overflow: hidden;
+}
+.dash-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  border-radius: 20px 20px 0 0; transition: height .22s;
+}
+.card-blue::before  { background: linear-gradient(90deg, #3b82f6, #8b5cf6); }
+.card-green::before { background: linear-gradient(90deg, #22c55e, #06b6d4); }
+.dash-card:hover { background: var(--card-hover); transform: translateY(-5px); box-shadow: 0 24px 52px rgba(0,0,0,.45); border-color: rgba(255,255,255,.12); }
+.dash-card:hover::before { height: 4px; }
+
+.card-icon {
+  width: 54px; height: 54px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem; margin-bottom: 18px;
+}
+.icon-blue  { background: rgba(59,130,246,.15); }
+.icon-green { background: rgba(34,197,94,.15); }
+
+.card-tag { font-size: .67rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+.tag-blue  { color: var(--accent-blue); }
+.tag-green { color: var(--accent-green); }
+
+.dash-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+.dash-card p  { font-size: .83rem; color: var(--sub); line-height: 1.65; margin-bottom: 22px; }
+
+.card-features { display: flex; flex-direction: column; gap: 7px; margin-bottom: 26px; }
+.feature { display: flex; align-items: center; gap: 8px; font-size: .77rem; color: var(--sub); }
+.feature-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.dot-blue  { background: var(--accent-blue); }
+.dot-green { background: var(--accent-green); }
+
+.card-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 11px 16px; border-radius: 10px; font-size: .84rem; font-weight: 600; transition: all .18s;
+}
+.btn-blue  { background: rgba(59,130,246,.12); color: #93c5fd; }
+.btn-green { background: rgba(34,197,94,.12);  color: #86efac; }
+.dash-card:hover .btn-blue  { background: rgba(59,130,246,.22); }
+.dash-card:hover .btn-green { background: rgba(34,197,94,.22); }
+.arrow { font-size: 1.1rem; transition: transform .18s; }
+.dash-card:hover .arrow { transform: translateX(5px); }
+
+/* FOOTER */
+footer {
+  text-align: center; padding: 24px;
+  border-top: 1px solid var(--border);
+  font-size: .74rem; color: var(--muted);
+}
+footer a { color: var(--accent-blue); text-decoration: none; }
+footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="header-left">
-    <h1>📊 Production &amp; Electricity Dashboard</h1>
-    <p>Line WA · Line WB · Line WN &nbsp;|&nbsp; BCM = Bank Cubic Meters (หน่วยปริมาตรดินที่ขุด) &nbsp;|&nbsp; kWh/BCM : ค่ายิ่งต่ำ = ประหยัดพลังงานมากกว่า</p>
+<!-- HEADER -->
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">&#9889;</div>
+    <div class="logo-text">
+      <h1>Production Portal</h1>
+      <p>Line WA &middot; WB &middot; WN Mining Operations</p>
+    </div>
   </div>
-  <div style="display:flex;gap:10px;align-items:center;">
-    <button class="sheet-btn" onclick="openDataEntry()">📝 กรอกข้อมูล</button>
-    <button class="sheet-btn" onclick="openSettings()">🔗 เชื่อม Google Sheet</button>
-    <button class="sheet-btn" onclick="loadFromSheets()" id="refreshBtn" style="display:none;">🔄 Refresh</button>
-    <div class="header-badge" id="lastUpdate">อัปเดต: มิถุนายน 2569</div>
+  <div class="header-right">
+    <div class="live-badge">
+      <span class="live-dot"></span>
+      Data Connected
+    </div>
+    <span id="headerTime">&#8212;</span>
   </div>
-</div>
-<div id="sheetStatusBar" style="display:none;background:#f0fae8;border-bottom:1px solid #c0e0a0;padding:6px 36px;font-size:11px;color:#2a6010;font-weight:600;">
-  <span id="sheetStatusText"></span>
-</div>
+</header>
 
-<div class="controls">
-  <label>เลือกปี :</label>
-  <select id="yearSelect" onchange="updateAll()">
-    <option value="all">ทุกปี (2021–2025)</option>
-    <option value="2021">2021</option>
-    <option value="2022">2022</option>
-    <option value="2023">2023</option>
-    <option value="2024">2024</option>
-    <option value="2025">2025</option>
-  </select>
-  <label>มุมมอง :</label>
-  <select id="viewSelect" onchange="updateAll()">
-    <option value="monthly">รายเดือน</option>
-    <option value="annual">รายปี</option>
-  </select>
-  <label>Line :</label>
-  <div class="line-btns">
-    <button class="line-btn active" onclick="setLine('WA',this)">Line WA</button>
-    <button class="line-btn" onclick="setLine('WB',this)">Line WB</button>
-    <button class="line-btn" onclick="setLine('WN',this)">Line WN</button>
-    <button class="line-btn" onclick="setLine('ALL',this)">รวมทุก Line</button>
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">&#9935; Mining Production Intelligence</div>
+  <h2>Production Dashboard<br>Command Center</h2>
+  <p>ศูนย์กลางข้อมูล Production และค่าไฟฟ้าของ Line WA, WB และ WN<br>เลือก Dashboard ที่ต้องการด้านล่าง</p>
+
+  <div class="line-pills">
+    <span class="pill pill-wa">&#11044; Line WA</span>
+    <span class="pill pill-wb">&#11044; Line WB</span>
+    <span class="pill pill-wn">&#11044; Line WN</span>
   </div>
-  <div class="ctrl-sep"></div>
-  <label>หัวข้อ :</label>
-  <div class="sec-tabs">
-    <button id="tabProd" class="sec-tab active" onclick="setSection('prod',this)">🏭 Production &amp; Downtime</button>
-    <button id="tabElec" class="sec-tab elec" onclick="setSection('elec',this)">⚡ Electricity &amp; Energy</button>
-    <button id="tabDaily" class="sec-tab daily-tab" onclick="setSection('daily',this)">📅 รายวัน</button>
-    <button id="tabRt" class="sec-tab rt-tab" onclick="setSection('realtime',this)">🔴 Realtime Monitor</button>
+
+  <div class="stats-row">
+    <div class="stat"><div class="stat-v">3</div><div class="stat-l">Production Lines</div></div>
+    <div class="stat"><div class="stat-v">2020–2026</div><div class="stat-l">ช่วงข้อมูล</div></div>
+    <div class="stat"><div class="stat-v">1,586</div><div class="stat-l">Daily Records</div></div>
+    <div class="stat"><div class="stat-v">2</div><div class="stat-l">Dashboard Modules</div></div>
   </div>
 </div>
 
-<!-- ════════════ PRODUCTION SECTION ════════════ -->
-<div id="prodSection">
-<div class="sec-hdr">🏭 Production &amp; Downtime</div>
-<div class="kpi-grid" id="prodKPI"></div>
-<div class="section">
-  <div class="row2 mb12">
-    <div class="chart-card">
-      <h3>🏭 Production Plan vs Actual (BCM) + % Achievement</h3>
-      <canvas id="prodChart" height="200"></canvas>
+<!-- CARDS -->
+<div class="cards">
+
+  <a class="dash-card card-blue" href="dashboard.html">
+    <div class="card-icon icon-blue">&#128202;</div>
+    <div class="card-tag tag-blue">Monthly &middot; Annual</div>
+    <h3>Production &amp; Electricity Dashboard</h3>
+    <p>ภาพรวม Production Plan vs Actual, % Achievement รายเดือน/รายปี และการวิเคราะห์ค่าไฟฟ้า (kWh/BCM)</p>
+    <div class="card-features">
+      <div class="feature"><div class="feature-dot dot-blue"></div>BCM Plan vs Actual รายเดือน &amp; รายปี</div>
+      <div class="feature"><div class="feature-dot dot-blue"></div>% Achievement Trend ทุก Line</div>
+      <div class="feature"><div class="feature-dot dot-blue"></div>Electricity kWh/BCM Analysis</div>
+      <div class="feature"><div class="feature-dot dot-blue"></div>Downtime &amp; Activity Breakdown</div>
+      <div class="feature"><div class="feature-dot dot-blue"></div>Realtime Monitor</div>
     </div>
-    <div class="chart-card">
-      <h3>📅 สัดส่วนวันทำงาน (Activity)</h3>
-      <canvas id="donutChart" height="200"></canvas>
+    <div class="card-btn btn-blue">
+      <span>เข้าดู Dashboard</span>
+      <span class="arrow">&#8594;</span>
     </div>
-  </div>
-  <div class="chart-card mb12">
-    <div class="chart-hdr">
-      <h3 id="ytdTitle">📅 Production Plan vs Actual รายปี — เปรียบเทียบทุกปี + % Achievement</h3>
-      <select id="ytdView" class="chart-sel" onchange="renderYTD()">
-        <option value="annual">รายปี</option>
-        <option value="monthly">รายเดือน</option>
-      </select>
+  </a>
+
+  <a class="dash-card card-green" href="daily_dashboard.html">
+    <div class="card-icon icon-green">&#128197;</div>
+    <div class="card-tag tag-green">Daily &middot; Real-time</div>
+    <h3>Daily Production Dashboard</h3>
+    <p>ข้อมูลรายวัน BCM สะสม, Working Hours, Activity Calendar และพยากรณ์ BCM สิ้นเดือนด้วย Linear Trend</p>
+    <div class="card-features">
+      <div class="feature"><div class="feature-dot dot-green"></div>BCM สะสมรายวัน + Prediction</div>
+      <div class="feature"><div class="feature-dot dot-green"></div>Activity Calendar (RUN/PM/SHIFT&#8230;)</div>
+      <div class="feature"><div class="feature-dot dot-green"></div>Working Hours รายวัน</div>
+      <div class="feature"><div class="feature-dot dot-green"></div>สัดส่วน Activity Donut Chart</div>
+      <div class="feature"><div class="feature-dot dot-green"></div>ครอบคลุม Jan 2025 &#8211; ปัจจุบัน</div>
     </div>
-    <canvas id="ytdChart" height="130"></canvas>
-  </div>
-  <div class="chart-card mb12">
-    <div class="chart-hdr">
-      <h3>🕐 ชั่วโมงทำงานสายพาน — เปรียบเทียบรายเดือนแต่ละปี (WH Plan vs Actual)</h3>
-      <select id="whView" class="chart-sel" onchange="renderWH()">
-        <option value="actual">Actual รายปี</option>
-        <option value="both">Plan vs Actual (ปีที่เลือก)</option>
-      </select>
+    <div class="card-btn btn-green">
+      <span>เข้าดู Dashboard</span>
+      <span class="arrow">&#8594;</span>
     </div>
-    <canvas id="whChart" height="140"></canvas>
-  </div>
-  <div class="row2eq mb12">
-    <div class="chart-card">
-      <h3>⚙️ Equipment Availability (%) — วัน RUN ÷ วันทั้งหมด × 100 | Target &gt;70%</h3>
-      <canvas id="availChart" height="170"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>🔧 วัน RUN vs PM/DPM รายเดือน — PM เพิ่มขึ้น = Availability ลดลง</h3>
-      <canvas id="pmChart" height="170"></canvas>
-    </div>
-  </div>
-  <div class="chart-card mb12">
-    <h3>📋 ตารางสรุปการผลิตรายช่วง</h3><br>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>เดือน/ปี</th><th>Plan (ล้าน BCM)</th><th>Actual (ล้าน BCM)</th>
-          <th>% Achievement</th><th>Availability</th>
-          <th>วัน RUN</th><th>วัน PM/DPM</th><th>วัน SHIFT</th><th>วัน Stand By</th>
-          <th>BCM/hr</th>
-        </tr></thead>
-        <tbody id="prodBody"></tbody>
-      </table>
-    </div>
-  </div>
+  </a>
+
 </div>
 
-</div><!-- end prodSection -->
-
-<!-- ════════════ ELECTRICITY SECTION ════════════ -->
-<div id="elecSection" style="display:none">
-<div class="sec-hdr" style="background:#2e1a6a;">⚡ Electricity &amp; Energy Efficiency</div>
-<div class="kpi-grid" id="elecKPI"></div>
-<div class="section">
-  <div class="row2eq mb12">
-    <div class="chart-card">
-      <h3>⚡ Power Consumption (MWh) รายช่วง</h3>
-      <canvas id="powerChart" height="180"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>📊 kWh/BCM เฉลี่ยรายปี vs Baseline (5.89)</h3>
-      <canvas id="annualBar" height="180"></canvas>
-    </div>
-  </div>
-  <div class="row2eq mb12">
-    <div class="chart-card">
-      <h3>📈 แนวโน้ม kWh/BCM + 3-Month Rolling Avg — เส้นยิ่งสูง = ใช้ไฟมากขึ้น</h3>
-      <canvas id="effChart" height="170"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>🎯 kWh/BCM รายเดือน — 🟢 ดี (≤7) 🟡 เฝ้าระวัง (7–9) 🔴 วิกฤต (&gt;9)</h3>
-      <canvas id="effBarChart" height="170"></canvas>
-    </div>
-  </div>
-  <div class="chart-card mb12">
-    <h3>📋 ตารางสรุปค่าไฟฟ้ารายช่วง</h3><br>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>เดือน/ปี</th><th>Production Actual (BCM)</th>
-          <th>พลังงานที่ใช้ (MWh)</th><th>kWh / BCM</th>
-          <th>เทียบ Baseline +5.89</th><th>เทียบปีก่อน (YoY)</th>
-        </tr></thead>
-        <tbody id="elecBody"></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-</div><!-- end elecSection -->
-
-<!-- ════════════ DAILY SECTION ════════════ -->
-<div id="dailySection" style="display:none">
-<div class="sec-hdr" style="background:#1a4a7a;">📅 รายละเอียดรายวัน — Production &amp; Electricity Monitor</div>
-<div class="daily-ctrl">
-  <label>ปี :</label>
-  <select id="dailyYear" onchange="renderDailySection()">
-    <option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option><option value="2022">2022</option><option value="2021">2021</option>
-  </select>
-  <label>เดือน :</label>
-  <select id="dailyMonth" onchange="renderDailySection()">
-    <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
-    <option value="4">เมษายน</option><option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
-    <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option><option value="9">กันยายน</option>
-    <option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
-  </select>
-  <span id="dailyNote" style="font-size:11px;color:#3a6090;"></span>
-  <button class="sheet-btn" style="margin-left:auto;border-color:#3a70a0;background:#d8eaf8;color:#1a3a6a;" onclick="loadDailyData()">🔄 โหลดข้อมูลรายวัน</button>
-</div>
-<div class="section" style="padding-top:16px;">
-  <div class="chart-card mb12">
-    <h3 id="dailyTitle">📅 รายละเอียดรายวัน</h3><br>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>วันที่</th>
-          <th>BCM (ผลผลิต)</th>
-          <th>kWh (พลังงาน)</th>
-          <th>ชั่วโมงทำงาน</th>
-          <th>kWh / BCM</th>
-          <th>BCM / ชม.</th>
-        </tr></thead>
-        <tbody id="dailyBody"><tr><td colspan="6" style="text-align:center;color:#a07030;padding:24px;">กด <b>📝 กรอกข้อมูล</b> เพื่อเพิ่มข้อมูลรายวัน หรือกด <b>🔄 โหลดข้อมูลรายวัน</b> หากเชื่อม Google Sheet ไว้แล้ว</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-</div><!-- end dailySection -->
-
-<!-- ════════════ REALTIME SECTION ════════════ -->
-<div id="realtimeSection" style="display:none">
-<div class="sec-hdr" style="background:#7a1a1a;">🔴 Realtime Monitor — ข้อมูลรายชั่วโมง (CCR Input)</div>
-
-<div class="rt-ctrl">
-  <label>วันที่ :</label>
-  <input type="date" id="rtDate" onchange="renderRealtimeSection()">
-  <span id="rtNote" style="font-size:11px;color:#8a3020;font-weight:600;"></span>
-  <button class="sheet-btn" style="margin-left:auto;border-color:#a03020;background:#ffe0d8;color:#6a1a1a;" onclick="loadRealtimeData()">🔄 โหลดข้อมูล Realtime</button>
-  <button class="sheet-btn" style="border-color:#6a1a1a;background:#fff0e8;color:#6a1a1a;" onclick="openRtEntry()">📝 CCR กรอกข้อมูล</button>
-</div>
-
-<div class="kpi-grid" id="rtKPI"></div>
-
-<div class="section" style="padding-top:12px;">
-  <div class="row2 mb12">
-    <div class="chart-card">
-      <h3 id="rtChartTitle">📊 BCM รายชั่วโมง</h3>
-      <canvas id="rtHourlyChart" height="200"></canvas>
-    </div>
-    <div class="chart-card">
-      <h3>⚙️ สถานะเครื่องจักร</h3>
-      <div id="rtMachineStatus" style="padding:6px 0;"></div>
-    </div>
-  </div>
-
-  <div class="chart-card mb12">
-    <div class="chart-hdr">
-      <h3>⏸ เหตุการณ์หยุดเครื่อง (Downtime Events)</h3>
-      <span id="rtDTSummary" style="font-size:11px;color:#c03020;font-weight:700;"></span>
-    </div>
-    <div class="table-wrap">
-      <table>
-        <thead><tr>
-          <th>วันที่</th><th>เวลาเริ่ม</th><th>เวลาสิ้นสุด</th><th>รวม (นาที)</th>
-          <th>เครื่องจักร</th><th>สาเหตุ / รายละเอียด</th><th>ประเภท</th>
-        </tr></thead>
-        <tbody id="rtDTBody"><tr><td colspan="7" style="text-align:center;color:#2a7a40;padding:24px;">✅ ไม่มีข้อมูล Downtime ในวันนี้</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
-</div><!-- end realtimeSection -->
-
-<div class="footer">Production &amp; Electricity Dashboard · Line WA / WB / WN · ข้อมูลปี 2021–2025</div>
-
-<!-- ════ SETTINGS MODAL ════ -->
-<div class="modal-overlay" id="settingsModal">
-  <div class="modal">
-    <h2>🔗 เชื่อมต่อ Google Sheet</h2>
-    <p>วาง URL ของ Google Sheet แล้วกด <b>💾 บันทึก &amp; โหลดข้อมูล</b><br>
-    Dashboard จะดึงข้อมูลจาก Sheet WA, WB, WN และ Sheet รายวันโดยอัตโนมัติ</p>
-
-    <div class="step-box">
-      <b>วิธีตั้งค่า (ทำครั้งเดียว):</b><br>
-      1. Copy URL ของ Google Sheet มาวางในช่องด้านล่าง<br>
-      2. เปิด Google Sheet → กดปุ่ม <b>Share</b> (มุมบนขวา)<br>
-      3. เปลี่ยนเป็น <b>Anyone with the link</b> → <b>Viewer</b> → กด Done<br>
-      4. กด <b>💾 บันทึก &amp; โหลดข้อมูล</b>
-    </div>
-
-    <div class="modal-line">
-      <span class="modal-line-badge">📊</span>
-      <div style="flex:1">
-        <div style="font-size:11px;color:#888;margin-bottom:4px;">Google Sheet URL</div>
-        <input id="sheetIdInput" type="text" placeholder="https://docs.google.com/spreadsheets/d/1B5P-2Ep..." style="width:100%;box-sizing:border-box;" />
-      </div>
-    </div>
-
-    <div style="margin-top:18px;padding-top:14px;border-top:2px solid #f0d8a0;">
-      <b style="font-size:12px;color:#1a5c3a;">📝 Google Apps Script URL (สำหรับกรอกข้อมูล)</b>
-      <p style="font-size:11px;color:#a07030;margin:6px 0 8px;line-height:1.6;">Deploy Google Apps Script เป็น Web App แล้ววาง URL ที่นี่<br>เพื่อให้ปุ่ม <b>📝 กรอกข้อมูล</b> ส่งข้อมูลเข้า Google Sheet ได้โดยตรง</p>
-      <input id="urlScript" type="url" placeholder="https://script.google.com/macros/s/AKfy.../exec" />
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="closeSettings()">ยกเลิก</button>
-      <button class="btn-primary" onclick="saveAndLoad()">💾 บันทึก &amp; โหลดข้อมูล</button>
-    </div>
-  </div>
-</div>
-
-<!-- ════ DATA ENTRY MODAL ════ -->
-<div class="modal-overlay" id="dataEntryModal">
-  <div class="modal entry-modal">
-    <h2>📝 กรอกข้อมูลใหม่</h2>
-    <p>กรอกข้อมูลแล้วกด <b>บันทึก</b> ระบบส่งข้อมูลเข้า Google Sheet ทันที</p>
-
-    <div class="mtabs">
-      <button class="mtab active" onclick="setEntryTab('monthly',this)">📊 ข้อมูลรายเดือน</button>
-      <button class="mtab" onclick="setEntryTab('daily',this)">📅 ข้อมูลรายวัน</button>
-    </div>
-
-    <!-- ── Monthly Tab ── -->
-    <div class="mtab-pane active" id="entryMonthly">
-      <div class="form-row">
-        <div class="fg">
-          <label>Line *</label>
-          <select id="eLineM"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
-        </div>
-        <div class="fg">
-          <label>ปี (ค.ศ.) *</label>
-          <input id="eYearM" type="number" min="2020" max="2035" placeholder="2025">
-        </div>
-        <div class="fg">
-          <label>เดือน *</label>
-          <select id="eMonthM">
-            <option value="1">1 — มกราคม</option><option value="2">2 — กุมภาพันธ์</option><option value="3">3 — มีนาคม</option>
-            <option value="4">4 — เมษายน</option><option value="5">5 — พฤษภาคม</option><option value="6">6 — มิถุนายน</option>
-            <option value="7">7 — กรกฎาคม</option><option value="8">8 — สิงหาคม</option><option value="9">9 — กันยายน</option>
-            <option value="10">10 — ตุลาคม</option><option value="11">11 — พฤศจิกายน</option><option value="12">12 — ธันวาคม</option>
-          </select>
-        </div>
-        <div class="fg"></div>
-      </div>
-
-      <div class="section-lbl">🏭 Production</div>
-      <div class="form-row">
-        <div class="fg"><label>Plan BCM *</label><input id="ePlanBCM" type="number" placeholder="เช่น 2449116"></div>
-        <div class="fg"><label>Actual BCM *</label><input id="eActualBCM" type="number" placeholder="เช่น 2252832"></div>
-        <div class="fg"><label>WH Plan (ชั่วโมง)</label><input id="eWHPlan" type="number" step="0.1" placeholder="344"></div>
-        <div class="fg"><label>WH Actual (ชั่วโมง)</label><input id="eWHActual" type="number" step="0.1" placeholder="484.4"></div>
-      </div>
-      <div class="form-row">
-        <div class="fg"><label>kWh (พลังงานทั้งเดือน)</label><input id="eKWH" type="number" placeholder="เช่น 17706530"></div>
-        <div class="fg"></div>
-      </div>
-
-      <div class="section-lbl">⚙️ Activity (จำนวนวัน)</div>
-      <div class="form-row-4">
-        <div class="fg"><label>วัน RUN</label><input id="eDayRun" type="number" min="0" placeholder="18"></div>
-        <div class="fg"><label>วัน PM/DPM</label><input id="eDayPM" type="number" min="0" placeholder="8"></div>
-        <div class="fg"><label>วัน SHIFT</label><input id="eDayShift" type="number" min="0" placeholder="0"></div>
-        <div class="fg"><label>วัน Stand By</label><input id="eDaySB" type="number" min="0" placeholder="5"></div>
-      </div>
-      <div class="emsg" id="entryMsgM"></div>
-    </div>
-
-    <!-- ── Daily Tab ── -->
-    <div class="mtab-pane" id="entryDaily">
-      <div class="form-row">
-        <div class="fg">
-          <label>Line *</label>
-          <select id="eLineD"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
-        </div>
-        <div class="fg">
-          <label>ปี (ค.ศ.) *</label>
-          <input id="eYearD" type="number" min="2020" max="2035" placeholder="2025">
-        </div>
-        <div class="fg">
-          <label>เดือน *</label>
-          <select id="eMonthD">
-            <option value="1">1 — มกราคม</option><option value="2">2 — กุมภาพันธ์</option><option value="3">3 — มีนาคม</option>
-            <option value="4">4 — เมษายน</option><option value="5">5 — พฤษภาคม</option><option value="6">6 — มิถุนายน</option>
-            <option value="7">7 — กรกฎาคม</option><option value="8">8 — สิงหาคม</option><option value="9">9 — กันยายน</option>
-            <option value="10">10 — ตุลาคม</option><option value="11">11 — พฤศจิกายน</option><option value="12">12 — ธันวาคม</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>วันที่ *</label>
-          <input id="eDayD" type="number" min="1" max="31" placeholder="1–31">
-        </div>
-      </div>
-      <div class="section-lbl">📊 ข้อมูลประจำวัน</div>
-      <div class="form-row">
-        <div class="fg"><label>BCM (ผลผลิตวันนี้)</label><input id="eBCM" type="number" step="1" placeholder="เช่น 75000"></div>
-        <div class="fg"><label>kWh (พลังงานวันนี้)</label><input id="eKWHD" type="number" step="1" placeholder="เช่น 590000"></div>
-        <div class="fg"><label>Working Hours (ชั่วโมง)</label><input id="eWHD" type="number" step="0.1" placeholder="เช่น 16.5"></div>
-        <div class="fg"></div>
-      </div>
-      <div class="emsg" id="entryMsgD"></div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="closeDataEntry()">ยกเลิก</button>
-      <button class="btn-primary" onclick="submitEntry()">💾 บันทึกข้อมูล</button>
-    </div>
-  </div>
-</div>
-
-<!-- ════ REALTIME CCR ENTRY MODAL ════ -->
-<div class="modal-overlay" id="rtEntryModal">
-  <div class="modal entry-modal">
-    <h2>🔴 CCR กรอกข้อมูล Realtime</h2>
-    <p>กรอกข้อมูลรายชั่วโมง หรือบันทึกเหตุการณ์ Downtime แล้วกด <b>บันทึก</b></p>
-
-    <div class="mtabs">
-      <button class="mtab active" onclick="setRtTab('hourly',this)">📊 ข้อมูลรายชั่วโมง</button>
-      <button class="mtab" onclick="setRtTab('downtime',this)">⏸ บันทึก Downtime</button>
-    </div>
-
-    <!-- ── Hourly Pane ── -->
-    <div class="mtab-pane active" id="rtPaneH">
-      <div class="form-row">
-        <div class="fg"><label>Line *</label>
-          <select id="rtLineH"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
-        </div>
-        <div class="fg"><label>วันที่ *</label><input id="rtDateH" type="date"></div>
-        <div class="fg"><label>ชั่วโมง * (0–23)</label><input id="rtHourH" type="number" min="0" max="23" placeholder="0–23"></div>
-        <div class="fg"></div>
-      </div>
-      <div class="section-lbl">📊 ข้อมูลชั่วโมงนี้</div>
-      <div class="form-row">
-        <div class="fg"><label>BCM (ชั่วโมงนี้)</label><input id="rtBCMH" type="number" step="1" placeholder="เช่น 3500"></div>
-        <div class="fg"><label>กระแสไฟฟ้า (A)</label><input id="rtCurrentH" type="number" step="0.1" placeholder="เช่น 245.5"></div>
-        <div class="fg"><label>หมายเหตุ</label><input id="rtNoteH" type="text" placeholder="ไม่บังคับ"></div>
-        <div class="fg"></div>
-      </div>
-      <div class="emsg" id="rtMsgH"></div>
-    </div>
-
-    <!-- ── Downtime Pane ── -->
-    <div class="mtab-pane" id="rtPaneDT">
-      <div class="form-row">
-        <div class="fg"><label>Line *</label>
-          <select id="rtLineDT"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
-        </div>
-        <div class="fg"><label>วันที่ *</label><input id="rtDateDT" type="date"></div>
-        <div class="fg"><label>เวลาเริ่ม *</label><input id="rtStartDT" type="time"></div>
-        <div class="fg"><label>เวลาสิ้นสุด</label><input id="rtEndDT" type="time"></div>
-      </div>
-      <div class="section-lbl">⚙️ รายละเอียดเหตุการณ์</div>
-      <div class="form-row">
-        <div class="fg"><label>เครื่องจักร *</label>
-          <select id="rtMachineDT">
-            <option value="BWE">BWE</option><option value="Crusher">Crusher</option>
-            <option value="Conveyor">Conveyor</option><option value="Spreader">Spreader</option>
-            <option value="อื่นๆ">อื่นๆ</option>
-          </select>
-        </div>
-        <div class="fg"><label>ประเภท *</label>
-          <select id="rtTypeDT"><option value="unplanned">Unplanned (ไม่ได้วางแผน)</option><option value="planned">Planned (วางแผนไว้)</option></select>
-        </div>
-        <div class="fg" style="grid-column:span 2"><label>สาเหตุ / รายละเอียด *</label><input id="rtCauseDT" type="text" placeholder="เช่น Belt รั่ว, Crusher trip, ซ่อมปกติ…"></div>
-      </div>
-      <div class="emsg" id="rtMsgDT"></div>
-    </div>
-
-    <div class="modal-actions">
-      <button class="btn-ghost" onclick="closeRtEntry()">ยกเลิก</button>
-      <button class="btn-primary" style="background:#7a1a1a;" onclick="submitRtEntry()">💾 บันทึก</button>
-    </div>
-  </div>
-</div>
+<!-- FOOTER -->
+<footer>
+  Production Intelligence Portal &nbsp;&middot;&nbsp;
+  Line WA / WB / WN &nbsp;&middot;&nbsp;
+  Data: <a href="https://docs.google.com/spreadsheets/d/1B5P-2EpQDkh23-OmHijJU5HLIOmLDHzXjFKxjWPM3zg" target="_blank">Google Sheets</a>
+  &nbsp;&middot;&nbsp;
+  <a href="https://github.com/waschara-ui/production-dashboard" target="_blank">GitHub</a>
+</footer>
 
 <script>
-const DATA = {
-  WA: [{y:2021,m:1,pp:2360600,pa:2930582,ach:124.1,wp:490,wa:594.6,kwh:18622769,eff:6.35,run:24,pm:6,sh:1,sb:0},{y:2021,m:2,pp:2248390,pa:2893319,ach:128.7,wp:461,wa:546.0,kwh:18549087,eff:6.41,run:21,pm:6,sh:1,sb:3},{y:2021,m:3,pp:2869600,pa:2624968,ach:91.5,wp:482,wa:528.3,kwh:16908916,eff:6.44,run:20,pm:6,sh:0,sb:5},{y:2021,m:4,pp:2429551,pa:2055655,ach:84.6,wp:398,wa:420.9,kwh:13299902,eff:6.47,run:18,pm:3,sh:3,sb:7},{y:2021,m:5,pp:2296000,pa:2291614,ach:99.8,wp:431,wa:468.1,kwh:15395864,eff:6.72,run:20,pm:4,sh:4,sb:3},{y:2021,m:6,pp:2231423,pa:2124683,ach:95.2,wp:393,wa:540.9,kwh:13987816,eff:6.58,run:23,pm:6,sh:0,sb:2},{y:2021,m:7,pp:2375030,pa:2084908,ach:87.8,wp:432,wa:486.4,kwh:14172483,eff:6.80,run:18,pm:6,sh:1,sb:6},{y:2021,m:8,pp:2549887,pa:1904123,ach:74.7,wp:424,wa:452.8,kwh:13086607,eff:6.87,run:21,pm:3,sh:1,sb:6},{y:2021,m:9,pp:2912195,pa:1769623,ach:60.8,wp:478,wa:415.0,kwh:12612484,eff:7.13,run:19,pm:6,sh:3,sb:3},{y:2021,m:10,pp:3304735,pa:2218840,ach:67.1,wp:549,wa:485.2,kwh:15961178,eff:7.19,run:21,pm:6,sh:0,sb:4},{y:2021,m:11,pp:3310815,pa:2546297,ach:76.9,wp:541,wa:557.3,kwh:18256882,eff:7.17,run:24,pm:3,sh:1,sb:3},{y:2021,m:12,pp:3015664,pa:2923757,ach:97.0,wp:549,wa:592.4,kwh:20221422,eff:6.92,run:25,pm:2,sh:2,sb:2},{y:2022,m:1,pp:2832500,pa:3045149,ach:107.5,wp:515,wa:574.4,kwh:20888960,eff:6.86,run:23,pm:1,sh:4,sb:3},{y:2022,m:2,pp:2601500,pa:2672561,ach:102.7,wp:473,wa:495.9,kwh:17782122,eff:6.65,run:19,pm:2,sh:3,sb:7},{y:2022,m:3,pp:2832500,pa:2848044,ach:100.5,wp:515,wa:582.2,kwh:19010170,eff:6.67,run:23,pm:2,sh:2,sb:4},{y:2022,m:4,pp:2618000,pa:2247415,ach:85.8,wp:476,wa:515.2,kwh:15361248,eff:6.84,run:21,pm:2,sh:2,sb:6},{y:2022,m:5,pp:2750000,pa:1985096,ach:72.2,wp:500,wa:509.0,kwh:14148916,eff:7.13,run:19,pm:4,sh:1,sb:7},{y:2022,m:6,pp:2659250,pa:1979528,ach:74.4,wp:484,wa:464.4,kwh:14188717,eff:7.17,run:19,pm:6,sh:2,sb:4},{y:2022,m:7,pp:2398000,pa:1804573,ach:75.3,wp:436,wa:517.6,kwh:13186481,eff:7.31,run:26,pm:1,sh:0,sb:4},{y:2022,m:8,pp:2475000,pa:1495262,ach:60.4,wp:450,wa:389.1,kwh:11311202,eff:7.56,run:16,pm:5,sh:1,sb:9},{y:2022,m:9,pp:2381500,pa:1162781,ach:48.8,wp:433,wa:337.7,kwh:9214252,eff:7.92,run:8,pm:4,sh:0,sb:19},{y:2022,m:10,pp:2778200,pa:1308650,ach:47.1,wp:479,wa:358.4,kwh:10618872,eff:8.11,run:15,pm:12,sh:0,sb:4},{y:2022,m:11,pp:2645500,pa:1748355,ach:66.1,wp:481,wa:472.1,kwh:13304326,eff:7.61,run:18,pm:12,sh:0,sb:1},{y:2022,m:12,pp:2741340,pa:2004260,ach:73.1,wp:427,wa:523.9,kwh:15442135,eff:7.70,run:23,pm:6,sh:1,sb:1},{y:2023,m:1,pp:2681500,pa:1961749,ach:73.2,wp:425,wa:401.0,kwh:14442984,eff:7.36,run:14,pm:5,sh:0,sb:12},{y:2023,m:2,pp:2483019,pa:2002630,ach:80.7,wp:394,wa:453.7,kwh:14987182,eff:7.48,run:16,pm:4,sh:5,sb:6},{y:2023,m:3,pp:2939600,pa:2017116,ach:68.6,wp:458,wa:500.9,kwh:15910625,eff:7.89,run:16,pm:4,sh:1,sb:10},{y:2023,m:4,pp:2531075,pa:1213170,ach:47.9,wp:416,wa:310.4,kwh:9179187,eff:7.57,run:7,pm:3,sh:2,sb:19},{y:2023,m:5,pp:2338350,pa:1055107,ach:45.1,wp:500,wa:258.4,kwh:8601854,eff:8.15,run:3,pm:3,sh:0,sb:25},{y:2023,m:6,pp:2361734,pa:1618197,ach:68.5,wp:505,wa:360.1,kwh:12480792,eff:7.71,run:6,pm:6,sh:0,sb:19},{y:2023,m:7,pp:2386800,pa:1871565,ach:78.4,wp:477,wa:463.9,kwh:14611199,eff:7.81,run:19,pm:5,sh:1,sb:6},{y:2023,m:8,pp:2449680,pa:1413282,ach:57.7,wp:432,wa:367.4,kwh:11581609,eff:8.19,run:5,pm:8,sh:0,sb:18},{y:2023,m:9,pp:2587447,pa:1151605,ach:44.5,wp:437,wa:395.0,kwh:9843002,eff:8.55,run:12,pm:8,sh:0,sb:11},{y:2023,m:10,pp:2568500,pa:1365391,ach:53.2,wp:467,wa:422.9,kwh:11221963,eff:8.22,run:11,pm:12,sh:2,sb:6},{y:2023,m:11,pp:3494038,pa:1343962,ach:38.5,wp:490,wa:390.3,kwh:10553614,eff:7.85,run:11,pm:18,sh:1,sb:1},{y:2023,m:12,pp:3027200,pa:1054666,ach:34.8,wp:473,wa:337.0,kwh:8838156,eff:8.38,run:12,pm:15,sh:0,sb:4},{y:2024,m:1,pp:2624800,pa:1677580,ach:63.9,wp:407,wa:501.9,kwh:14543906,eff:8.67,run:11,pm:18,sh:1,sb:1},{y:2024,m:2,pp:2319524,pa:1641461,ach:70.8,wp:427,wa:487.4,kwh:14160022,eff:8.63,run:5,pm:22,sh:1,sb:3},{y:2024,m:3,pp:2517712,pa:1545176,ach:61.4,wp:464,wa:466.3,kwh:13896900,eff:8.99,run:10,pm:14,sh:2,sb:5},{y:2024,m:4,pp:1829238,pa:1810126,ach:99.0,wp:336,wa:509.0,kwh:16219263,eff:8.96,run:7,pm:18,sh:0,sb:6},{y:2024,m:5,pp:2099370,pa:1614947,ach:76.9,wp:390,wa:528.1,kwh:14792072,eff:9.16,run:10,pm:20,sh:1,sb:0},{y:2024,m:6,pp:2033735,pa:1451802,ach:71.4,wp:374,wa:477.5,kwh:13723604,eff:9.45,run:8,pm:18,sh:0,sb:5},{y:2024,m:7,pp:2157051,pa:1138641,ach:52.8,wp:397,wa:421.9,kwh:10422930,eff:9.15,run:9,pm:18,sh:0,sb:4},{y:2024,m:8,pp:2601119,pa:1154778,ach:44.4,wp:459,wa:459.5,kwh:11078899,eff:9.59,run:11,pm:14,sh:0,sb:6},{y:2024,m:9,pp:2613944,pa:1024303,ach:39.2,wp:461,wa:383.5,kwh:9363044,eff:9.14,run:11,pm:9,sh:0,sb:11},{y:2024,m:10,pp:2407610,pa:1504240,ach:62.5,wp:517,wa:489.5,kwh:12630314,eff:8.40,run:10,pm:18,sh:0,sb:3},{y:2024,m:11,pp:2383463,pa:1847124,ach:77.5,wp:543,wa:508.5,kwh:16053837,eff:8.69,run:11,pm:13,sh:2,sb:5},{y:2024,m:12,pp:2041710,pa:1779205,ach:87.1,wp:523,wa:526.1,kwh:16233493,eff:9.12,run:10,pm:20,sh:1,sb:0},{y:2025,m:1,pp:1950238,pa:2101362,ach:107.7,wp:407,wa:586.7,kwh:19593292,eff:9.32,run:15,pm:14,sh:2,sb:0},{y:2025,m:2,pp:1786710,pa:1664613,ach:93.2,wp:447,wa:494.0,kwh:14661644,eff:8.81,run:15,pm:9,sh:1,sb:6},{y:2025,m:3,pp:1981280,pa:2406377,ach:121.5,wp:464,wa:576.7,kwh:20203118,eff:8.40,run:15,pm:16,sh:0,sb:0},{y:2025,m:4,pp:1947898,pa:2128855,ach:109.3,wp:426,wa:513.2,kwh:16672964,eff:7.83,run:19,pm:9,sh:0,sb:3},{y:2025,m:5,pp:2521240,pa:1837230,ach:72.9,wp:409,wa:484.2,kwh:14587766,eff:7.94,run:19,pm:9,sh:0,sb:3},{y:2025,m:6,pp:2449116,pa:2252832,ach:92.0,wp:344,wa:484.4,kwh:17706530,eff:7.86,run:18,pm:8,sh:0,sb:5},{y:2025,m:7,pp:1817774,pa:1600804,ach:88.1,wp:400,wa:410.4,kwh:12279214,eff:7.67,run:11,pm:8,sh:1,sb:11},{y:2025,m:8,pp:1756774,pa:1595932,ach:90.8,wp:400,wa:425.8,kwh:12502474,eff:7.83,run:17,pm:8,sh:2,sb:4},{y:2025,m:9,pp:2303554,pa:1582520,ach:68.7,wp:358,wa:454.3,kwh:13124002,eff:8.29,run:17,pm:11,sh:2,sb:1},{y:2025,m:10,pp:2166767,pa:1259000,ach:58.1,wp:420,wa:436.7,kwh:10832222,eff:8.60,run:15,pm:11,sh:0,sb:5}],
-  WB: [{y:2021,m:1,pp:1609400,pa:1644660,ach:102.2,wp:479,wa:529.2,kwh:11527540,eff:7.01,run:20,pm:3,sh:5,sb:3},{y:2021,m:2,pp:1732340,pa:1570281,ach:90.6,wp:465,wa:478.6,kwh:10023724,eff:6.38,run:18,pm:5,sh:0,sb:8},{y:2021,m:3,pp:1648800,pa:1702773,ach:103.3,wp:466,wa:576.0,kwh:12626967,eff:7.42,run:24,pm:5,sh:0,sb:2},{y:2021,m:4,pp:1523646,pa:1200252,ach:78.8,wp:403,wa:418.8,kwh:8880582,eff:7.40,run:21,pm:2,sh:1,sb:7},{y:2021,m:5,pp:1485193,pa:1598713,ach:107.6,wp:450,wa:516.3,kwh:11749266,eff:7.35,run:23,pm:4,sh:0,sb:4},{y:2021,m:6,pp:1356445,pa:1412589,ach:104.1,wp:405,wa:454.7,kwh:10914900,eff:7.73,run:23,pm:5,sh:1,sb:2},{y:2021,m:7,pp:1467400,pa:1536261,ach:104.7,wp:445,wa:469.4,kwh:11026895,eff:7.18,run:19,pm:6,sh:0,sb:6},{y:2021,m:8,pp:1437000,pa:1648523,ach:114.7,wp:421,wa:483.4,kwh:10837789,eff:6.57,run:20,pm:3,sh:1,sb:7},{y:2021,m:9,pp:2475200,pa:1521564,ach:61.5,wp:476,wa:410.7,kwh:10049368,eff:6.60,run:22,pm:5,sh:1,sb:3},{y:2021,m:10,pp:2582560,pa:2247623,ach:87.0,wp:549,wa:504.8,kwh:14741608,eff:6.56,run:22,pm:6,sh:1,sb:2},{y:2021,m:11,pp:2638299,pa:2702076,ach:102.4,wp:533,wa:602.1,kwh:18665448,eff:6.91,run:22,pm:7,sh:1,sb:1},{y:2021,m:12,pp:2761040,pa:2592917,ach:93.9,wp:541,wa:570.0,kwh:17736611,eff:6.84,run:22,pm:4,sh:3,sb:2},{y:2022,m:1,pp:2460000,pa:2361707,ach:96.0,wp:500,wa:537.0,kwh:16474517,eff:6.98,run:22,pm:3,sh:4,sb:2},{y:2022,m:2,pp:2485770,pa:2035304,ach:81.9,wp:477,wa:482.6,kwh:14791332,eff:7.27,run:18,pm:5,sh:1,sb:7},{y:2022,m:3,pp:2597700,pa:2221693,ach:85.5,wp:459,wa:518.7,kwh:15345175,eff:6.91,run:18,pm:8,sh:3,sb:2},{y:2022,m:4,pp:2602532,pa:1757528,ach:67.5,wp:480,wa:468.9,kwh:12826823,eff:7.30,run:19,pm:4,sh:0,sb:8},{y:2022,m:5,pp:2777700,pa:2000870,ach:72.0,wp:538,wa:493.3,kwh:14013524,eff:7.00,run:22,pm:5,sh:0,sb:4},{y:2022,m:6,pp:2692862,pa:1994302,ach:74.1,wp:529,wa:494.3,kwh:13051221,eff:6.54,run:20,pm:7,sh:0,sb:4},{y:2022,m:7,pp:2574000,pa:1573312,ach:61.1,wp:512,wa:480.1,kwh:10237576,eff:6.51,run:23,pm:6,sh:0,sb:2},{y:2022,m:8,pp:2482500,pa:1323013,ach:53.3,wp:485,wa:371.9,kwh:8886678,eff:6.72,run:18,pm:7,sh:0,sb:6},{y:2022,m:9,pp:2357819,pa:1330134,ach:56.4,wp:457,wa:384.7,kwh:9090230,eff:6.83,run:16,pm:7,sh:0,sb:8},{y:2022,m:10,pp:2541200,pa:907021,ach:35.7,wp:472,wa:344.4,kwh:6676432,eff:7.36,run:10,pm:7,sh:0,sb:14},{y:2022,m:11,pp:2317500,pa:1126150,ach:48.6,wp:515,wa:309.0,kwh:7925928,eff:7.04,run:16,pm:6,sh:0,sb:9},{y:2022,m:12,pp:2326867,pa:1936541,ach:83.2,wp:421,wa:483.1,kwh:13022516,eff:6.72,run:21,pm:9,sh:0,sb:1},{y:2023,m:1,pp:2438170,pa:1753457,ach:71.9,wp:427,wa:393.5,kwh:11305721,eff:6.45,run:13,pm:6,sh:1,sb:11},{y:2023,m:2,pp:2439430,pa:1370033,ach:56.2,wp:424,wa:335.4,kwh:9210511,eff:6.72,run:9,pm:4,sh:2,sb:16},{y:2023,m:3,pp:2348800,pa:766675,ach:32.6,wp:464,wa:278.0,kwh:6127407,eff:7.99,run:7,pm:1,sh:1,sb:22},{y:2023,m:4,pp:1388733,pa:573627,ach:41.3,wp:296,wa:261.5,kwh:4684722,eff:8.17,run:9,pm:3,sh:0,sb:19},{y:2023,m:5,pp:2062500,pa:329464,ach:16.0,wp:450,wa:127.7,kwh:2340983,eff:7.11,run:3,pm:0,sh:0,sb:28},{y:2023,m:6,pp:1993750,pa:1209043,ach:60.6,wp:435,wa:334.9,kwh:8376160,eff:6.93,run:11,pm:6,sh:0,sb:13},{y:2023,m:7,pp:1875800,pa:1517001,ach:80.9,wp:441,wa:429.0,kwh:10550338,eff:6.95,run:18,pm:4,sh:0,sb:9},{y:2023,m:8,pp:1652112,pa:1302119,ach:78.8,wp:432,wa:336.3,kwh:8665437,eff:6.65,run:7,pm:5,sh:1,sb:18},{y:2023,m:9,pp:1692000,pa:1014691,ach:60.0,wp:423,wa:301.5,kwh:7074654,eff:6.97,run:6,pm:2,sh:0,sb:22},{y:2023,m:10,pp:2101500,pa:1540546,ach:73.3,wp:467,wa:439.8,kwh:10557340,eff:6.85,run:12,pm:9,sh:0,sb:10},{y:2023,m:11,pp:2058000,pa:1358231,ach:66.0,wp:490,wa:410.5,kwh:9437770,eff:6.95,run:10,pm:17,sh:0,sb:4},{y:2023,m:12,pp:2128500,pa:1745115,ach:82.0,wp:473,wa:453.4,kwh:12117734,eff:6.94,run:16,pm:13,sh:0,sb:2},{y:2024,m:1,pp:1709400,pa:1530943,ach:89.6,wp:407,wa:422.5,kwh:10663041,eff:6.97,run:10,pm:15,sh:0,sb:6},{y:2024,m:2,pp:1649911,pa:1699042,ach:103.0,wp:467,wa:525.3,kwh:11510880,eff:6.77,run:11,pm:15,sh:0,sb:5},{y:2024,m:3,pp:1639312,pa:1247945,ach:76.1,wp:464,wa:478.5,kwh:10037820,eff:8.04,run:10,pm:15,sh:1,sb:5},{y:2024,m:4,pp:1187088,pa:1169582,ach:98.5,wp:336,wa:473.9,kwh:9044376,eff:7.73,run:7,pm:16,sh:0,sb:8},{y:2024,m:5,pp:1377870,pa:1249094,ach:90.7,wp:390,wa:497.4,kwh:10410039,eff:8.33,run:10,pm:19,sh:1,sb:1},{y:2024,m:6,pp:1321342,pa:1229618,ach:93.1,wp:374,wa:471.3,kwh:9095707,eff:7.40,run:13,pm:15,sh:1,sb:2},{y:2024,m:7,pp:1402601,pa:1323883,ach:94.4,wp:397,wa:525.6,kwh:9871558,eff:7.46,run:13,pm:17,sh:0,sb:1},{y:2024,m:8,pp:1965731,pa:980160,ach:49.9,wp:417,wa:458.8,kwh:7872989,eff:8.03,run:16,pm:9,sh:1,sb:5},{y:2024,m:9,pp:1420266,pa:1025582,ach:72.2,wp:402,wa:410.5,kwh:7694113,eff:7.50,run:8,pm:12,sh:0,sb:11},{y:2024,m:10,pp:2677990,pa:547430,ach:20.4,wp:469,wa:267.8,kwh:4384962,eff:8.01,run:7,pm:6,sh:0,sb:18},{y:2024,m:11,pp:1333750,pa:380215,ach:28.5,wp:275,wa:175.0,kwh:3510455,eff:9.23,run:3,pm:6,sh:0,sb:22},{y:2024,m:12,pp:2303750,pa:1159550,ach:50.3,wp:475,wa:474.1,kwh:10615964,eff:9.16,run:12,pm:14,sh:0,sb:5},{y:2025,m:1,pp:1895040,pa:1300721,ach:68.6,wp:407,wa:546.1,kwh:11556307,eff:8.88,run:16,pm:14,sh:0,sb:1},{y:2025,m:2,pp:1286655,pa:700855,ach:54.5,wp:446,wa:295.2,kwh:5826395,eff:8.31,run:6,pm:8,sh:0,sb:17},{y:2025,m:3,pp:1767840,pa:603494,ach:34.1,wp:464,wa:250.7,kwh:4972862,eff:8.24,run:4,pm:7,sh:0,sb:20},{y:2025,m:4,pp:2295102,pa:1095231,ach:47.7,wp:425,wa:400.0,kwh:8544132,eff:7.80,run:14,pm:11,sh:0,sb:6},{y:2025,m:5,pp:2179050,pa:1021250,ach:46.9,wp:409,wa:352.0,kwh:8081492,eff:7.91,run:15,pm:12,sh:0,sb:4},{y:2025,m:6,pp:1780528,pa:1061141,ach:59.6,wp:344,wa:385.5,kwh:8486181,eff:8.00,run:14,pm:14,sh:0,sb:3},{y:2025,m:7,pp:1254520,pa:939305,ach:74.9,wp:350,wa:382.1,kwh:7742087,eff:8.24,run:17,pm:7,sh:0,sb:7},{y:2025,m:8,pp:1254520,pa:1270462,ach:101.3,wp:350,wa:408.7,kwh:10071573,eff:7.93,run:19,pm:10,sh:0,sb:2},{y:2025,m:9,pp:1674031,pa:1010285,ach:60.4,wp:358,wa:416.2,kwh:8471980,eff:8.39,run:15,pm:12,sh:0,sb:4},{y:2025,m:10,pp:2366383,pa:1292809,ach:54.6,wp:448,wa:478.1,kwh:10952871,eff:8.47,run:16,pm:14,sh:0,sb:1},{y:2025,m:11,pp:2123699,pa:66138,ach:3.1,wp:412,wa:26.3,kwh:506891,eff:7.66,run:2,pm:1,sh:0,sb:28}],
-  WN: [{y:2024,m:10,pp:173700,pa:313649,ach:180.6,wp:193,wa:120.8,kwh:2228121,eff:7.10,run:3,pm:7,sh:0,sb:21},{y:2024,m:11,pp:1199170,pa:755446,ach:63.0,wp:463,wa:472.2,kwh:5600378,eff:7.41,run:11,pm:13,sh:0,sb:7},{y:2024,m:12,pp:746120,pa:547518,ach:73.4,wp:473,wa:378.3,kwh:3853479,eff:7.04,run:7,pm:8,sh:2,sb:14},{y:2025,m:1,pp:995570,pa:167148,ach:16.8,wp:407,wa:96.4,kwh:1104605,eff:6.61,run:0,pm:1,sh:0,sb:30},{y:2025,m:2,pp:634514,pa:212021,ach:33.4,wp:446,wa:129.0,kwh:1337108,eff:6.31,run:11,pm:0,sh:2,sb:18},{y:2025,m:3,pp:1169280,pa:751730,ach:64.3,wp:464,wa:459.9,kwh:4894400,eff:6.51,run:19,pm:6,sh:1,sb:5},{y:2025,m:4,pp:1258320,pa:354615,ach:28.2,wp:428,wa:206.5,kwh:2251650,eff:6.35,run:2,pm:7,sh:0,sb:22},{y:2025,m:5,pp:1296660,pa:390877,ach:30.1,wp:409,wa:205.8,kwh:2406444,eff:6.16,run:12,pm:4,sh:2,sb:13},{y:2025,m:6,pp:856080,pa:532949,ach:62.3,wp:348,wa:310.2,kwh:3330906,eff:6.25,run:19,pm:7,sh:0,sb:5},{y:2025,m:7,pp:348000,pa:261534,ach:75.2,wp:200,wa:162.5,kwh:1707504,eff:6.53,run:13,pm:7,sh:0,sb:11},{y:2025,m:8,pp:348000,pa:269587,ach:77.5,wp:200,wa:164.1,kwh:1733368,eff:6.43,run:18,pm:4,sh:1,sb:8},{y:2025,m:9,pp:980503,pa:297287,ach:30.3,wp:362,wa:197.6,kwh:1975205,eff:6.64,run:20,pm:8,sh:0,sb:3},{y:2025,m:10,pp:1150240,pa:136521,ach:11.9,wp:420,wa:110.4,kwh:874700,eff:6.41,run:10,pm:5,sh:0,sb:16},{y:2025,m:11,pp:1235017,pa:24185,ach:2.0,wp:457,wa:14.8,kwh:156178,eff:6.46,run:1,pm:1,sh:0,sb:29}]
-};
-const BASELINE = 5.89;
-const MTH = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-const A = {green:'#2a7a40',red:'#c03020',amber1:'#fac775',amber2:'#ef9f27',amber3:'#ba7517',amber4:'#854f0b',amber5:'#633806',gray:'#a07050',gridLine:'#f5e0b0',textMuted:'#9a7030'};
-Chart.defaults.font.family = 'Segoe UI,Tahoma,sans-serif';
-Chart.defaults.color = A.textMuted;
-
-let currentLine = 'WA';
-let currentSection = 'prod';
-let currentEntryTab = 'monthly';
-let cProd,cDonut,cYtd,cWH,cAvail,cPM,cPower,cAnnual,cEff,cEffBar;
-const DAILY_DATA = {WA:[],WB:[],WN:[]};
-
-function setLine(line, btn) {
-  currentLine = line;
-  document.querySelectorAll('.line-btn').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  updateAll();
+function tick() {
+  const n = new Date();
+  document.getElementById('headerTime').textContent =
+    n.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}) + ' ' +
+    n.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
 }
-
-function setSection(sec, btn) {
-  currentSection = sec;
-  document.querySelectorAll('.sec-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('prodSection').style.display      = sec==='prod'     ? '' : 'none';
-  document.getElementById('elecSection').style.display      = sec==='elec'     ? '' : 'none';
-  document.getElementById('dailySection').style.display     = sec==='daily'    ? '' : 'none';
-  document.getElementById('realtimeSection').style.display  = sec==='realtime' ? '' : 'none';
-  if(sec==='daily') renderDailySection();
-  else if(sec==='realtime') renderRealtimeSection();
-  else updateAll();
-}
-function getView(){ return document.getElementById('viewSelect').value; }
-function getYear(){ return document.getElementById('yearSelect').value; }
-
-function mergeLines(lines, yearFilter) {
-  const map = {};
-  lines.forEach(l => {
-    (DATA[l]||[]).filter(r=>r.pp>0&&r.pa>0).forEach(r=>{
-      if(yearFilter!=='all' && r.y!=yearFilter) return;
-      const key=`${r.y}-${String(r.m).padStart(2,'0')}`;
-      if(!map[key]) map[key]={y:r.y,m:r.m,pp:0,pa:0,wp:0,wa:0,kwh:0,run:0,pm:0,sh:0,sb:0};
-      map[key].pp+=r.pp; map[key].pa+=r.pa; map[key].wp+=r.wp;
-      map[key].wa+=r.wa; map[key].kwh+=r.kwh;
-      map[key].run+=r.run; map[key].pm+=r.pm; map[key].sh+=r.sh; map[key].sb+=r.sb;
-    });
-  });
-  return Object.values(map).map(r=>({...r,
-    ach:r.pp>0?+(r.pa/r.pp*100).toFixed(1):0,
-    eff:r.pa>0?+(r.kwh/r.pa).toFixed(2):0
-  })).sort((a,b)=>a.y!==b.y?a.y-b.y:a.m-b.m);
-}
-
-function filtered() {
-  const year = getYear();
-  const view = getView();
-  const lines = currentLine==='ALL'?['WA','WB','WN']:[currentLine];
-  let d = mergeLines(lines, year);
-  if(view==='annual'){
-    const agg={};
-    d.forEach(r=>{
-      if(!agg[r.y]) agg[r.y]={y:r.y,m:0,pp:0,pa:0,wp:0,wa:0,kwh:0,run:0,pm:0,sh:0,sb:0};
-      ['pp','pa','wp','wa','kwh','run','pm','sh','sb'].forEach(k=>agg[r.y][k]+=r[k]);
-    });
-    d = Object.values(agg).map(a=>({...a,
-      ach:a.pp>0?+(a.pa/a.pp*100).toFixed(1):0,
-      eff:a.pa>0?+(a.kwh/a.pa).toFixed(2):0
-    })).sort((a,b)=>a.y-b.y);
-  }
-  return d;
-}
-
-function labels(d){ return getView()==='annual'?d.map(r=>`${r.y}`):d.map(r=>`${MTH[r.m]} ${r.y}`); }
-function N(n,dec=0){ return n==null?'-':n.toLocaleString('th-TH',{maximumFractionDigits:dec,minimumFractionDigits:dec}); }
-
-const gridOpts = {color:A.gridLine, ticks:{color:A.textMuted,font:{size:10}}};
-
-function updateAll(){
-  const d = filtered();
-  if(currentSection==='prod'){
-    renderProdKPI(d);
-    renderProd(d);
-    renderDonut(d);
-    renderYTD();
-    renderWH();
-    renderAvail(d);
-    renderPMTrend(d);
-    renderProdTable(d);
-  } else {
-    renderElecKPI(d);
-    renderPower(d);
-    renderAnnual();
-    renderEff(d);
-    renderEffBar(d);
-    renderElecTable(d);
-  }
-}
-
-/* ─── PRODUCTION KPI ─── */
-function renderProdKPI(d){
-  const tPlan=d.reduce((s,r)=>s+r.pp,0);
-  const tAct=d.reduce((s,r)=>s+r.pa,0);
-  const ach=tPlan>0?(tAct/tPlan*100).toFixed(1):0;
-  const tWH=d.reduce((s,r)=>s+r.wa,0);
-  const tRun=d.reduce((s,r)=>s+r.run,0);
-  const tDays=d.reduce((s,r)=>s+r.run+r.pm+r.sh+r.sb,0);
-  const tPM=d.reduce((s,r)=>s+r.pm,0);
-  const avail=tDays>0?(tRun/tDays*100).toFixed(1):0;
-  const rate=tWH>0?Math.round(tAct/tWH):0;
-  const cards=[
-    {top:A.amber3, lbl:'Production Actual', val:N(Math.round(tAct/1e6*10)/10), sub:`ล้าน BCM | Plan ${N(Math.round(tPlan/1e6*10)/10)} M`},
-    {top:ach>=100?A.green:ach>=80?A.amber3:A.red, lbl:'% Achievement vs Plan', val:`${ach}%`, cls:ach>=100?'pos':ach>=80?'neu':'neg', sub:ach>=100?'✅ บรรลุเป้าหมาย':ach>=80?'⚠️ ใกล้เป้า':'🔴 ต่ำกว่าเป้า — ต้องแก้ไข'},
-    {top:avail>=70?A.green:avail>=50?A.amber3:A.red, lbl:'Equipment Availability', val:`${avail}%`, cls:avail>=70?'pos':avail>=50?'neu':'neg', sub:`วัน RUN ${tRun} วัน จาก ${tDays} วัน | Target >70%`},
-    {top:tPM/(tDays||1)>0.35?A.red:A.amber3, lbl:'วัน PM/DPM สะสม', val:N(tPM), cls:tPM/(tDays||1)>0.35?'neg':'neu', sub:`${tDays>0?(tPM/tDays*100).toFixed(0):0}% ของวันทั้งหมด | ↑ เพิ่มขึ้นทุกปี`},
-    {top:A.amber3, lbl:'Productivity Rate', val:N(rate), sub:'BCM ต่อชั่วโมงทำงาน | ยิ่งสูงยิ่งดี'},
-  ];
-  document.getElementById('prodKPI').innerHTML=cards.map(c=>`<div class="kpi-card" style="--top:${c.top}"><div class="lbl">${c.lbl}</div><div class="val ${c.cls||''}">${c.val}</div><div class="sub">${c.sub}</div></div>`).join('');
-}
-
-/* ─── PRODUCTION CHART ─── */
-function renderProd(d){
-  if(cProd)cProd.destroy();
-  const achData=d.map(r=>r.pp>0?+(r.pa/r.pp*100).toFixed(1):null);
-  const achColors=achData.map(v=>v==null?A.gray:v>=100?A.green:v>=80?A.amber3:A.red);
-  cProd=new Chart(document.getElementById('prodChart'),{
-    data:{labels:labels(d),datasets:[
-      {type:'bar',label:'Plan (BCM)',data:d.map(r=>r.pp),backgroundColor:'#fac77588',borderColor:'#ef9f27',borderWidth:1.5,borderRadius:4,yAxisID:'y'},
-      {type:'bar',label:'Actual (BCM)',data:d.map(r=>r.pa),backgroundColor:'#ba751788',borderColor:'#854f0b',borderWidth:1.5,borderRadius:4,yAxisID:'y'},
-      {type:'line',label:'% Achievement',data:achData,borderColor:A.green,borderWidth:2.5,pointRadius:4,pointBackgroundColor:achColors,pointBorderColor:achColors,tension:0.3,fill:false,yAxisID:'y2'},
-      {type:'line',label:'100%',data:d.map(()=>100),borderColor:'#c0303055',borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false,yAxisID:'y2'}
-    ]},
-    options:{responsive:true,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{labels:{color:A.amber4,font:{size:10},filter:i=>i.text!=='100%'}},
-        tooltip:{callbacks:{label:ctx=>{if(ctx.dataset.yAxisID==='y2'){return ctx.dataset.label==='100%'?null:` % Ach: ${ctx.parsed.y!=null?ctx.parsed.y.toFixed(1)+'%':'-'}`;}return ` ${ctx.dataset.label}: ${(ctx.parsed.y/1e6).toFixed(2)} M BCM`;}}}},
-      scales:{
-        x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},
-        y:{...gridOpts,position:'left',ticks:{...gridOpts.ticks,callback:v=>(v/1e6).toFixed(1)+'M'},title:{display:true,text:'BCM',color:A.textMuted,font:{size:10}}},
-        y2:{...gridOpts,position:'right',min:0,max:140,grid:{display:false},ticks:{...gridOpts.ticks,callback:v=>v+'%'},title:{display:true,text:'% Achievement',color:A.green,font:{size:10}}}
-      }}
-  });
-}
-
-/* ─── DONUT ─── */
-function renderDonut(d){
-  const run=d.reduce((s,r)=>s+r.run,0),pm=d.reduce((s,r)=>s+r.pm,0);
-  const sh=d.reduce((s,r)=>s+r.sh,0),sb=d.reduce((s,r)=>s+r.sb,0);
-  const tot=run+pm+sh+sb;
-  if(cDonut)cDonut.destroy();
-  cDonut=new Chart(document.getElementById('donutChart'),{
-    type:'doughnut',
-    data:{labels:['RUN (ผลิต)','PM/DPM (ซ่อม)','SHIFT','Stand By'],
-      datasets:[{data:[run,pm,sh,sb],backgroundColor:['#ba7517','#c03020','#fac775','#f5d8a0'],borderColor:['#854f0b','#9a2010','#ef9f27','#f0c060'],borderWidth:1.5}]},
-    options:{responsive:true,plugins:{
-      legend:{position:'bottom',labels:{color:A.amber4,font:{size:10},padding:10}},
-      tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${ctx.parsed} วัน (${tot>0?(ctx.parsed/tot*100).toFixed(1):0}%)`}}
-    }}
-  });
-}
-
-/* ─── YTD CHART (รายปี / รายเดือน) ─── */
-function renderYTD(){
-  if(cYtd)cYtd.destroy();
-  const ytdMode = document.getElementById('ytdView').value;
-  const lines = currentLine==='ALL'?['WA','WB','WN']:[currentLine];
-  const titleEl = document.getElementById('ytdTitle');
-
-  let lbs, planData, actData, achData;
-
-  if(ytdMode==='annual'){
-    /* ── โหมดรายปี: รวมทุกเดือนในแต่ละปี ── */
-    titleEl.textContent='📅 Production Plan vs Actual รายปี — เปรียบเทียบทุกปี + % Achievement';
-    const all=mergeLines(lines,'all');
-    const agg={};
-    all.forEach(r=>{if(!agg[r.y])agg[r.y]={pp:0,pa:0};agg[r.y].pp+=r.pp;agg[r.y].pa+=r.pa;});
-    const years=Object.keys(agg).sort();
-    lbs=years;
-    planData=years.map(y=>agg[y].pp);
-    actData=years.map(y=>agg[y].pa);
-    achData=years.map(y=>agg[y].pp>0?+(agg[y].pa/agg[y].pp*100).toFixed(1):null);
-  } else {
-    /* ── โหมดรายเดือน: ใช้ปีที่เลือก (default 2025) ── */
-    const year = getYear()==='all' ? 2025 : parseInt(getYear());
-    titleEl.textContent=`📅 Production Plan vs Actual รายเดือน ปี ${year} + % Achievement`;
-    const src=mergeLines(lines,'all').filter(r=>r.y===year).sort((a,b)=>a.m-b.m);
-    lbs=src.map(r=>MTH[r.m]);
-    planData=src.map(r=>r.pp);
-    actData=src.map(r=>r.pa);
-    achData=src.map(r=>r.pp>0?+(r.pa/r.pp*100).toFixed(1):null);
-  }
-
-  const achColors=achData.map(v=>v==null?A.gray:v>=100?A.green:v>=80?A.amber3:A.red);
-  cYtd=new Chart(document.getElementById('ytdChart'),{
-    data:{labels:lbs,datasets:[
-      {type:'bar',label:'Plan (BCM)',data:planData,backgroundColor:'#fac77555',borderColor:'#ef9f27',borderWidth:1.5,borderRadius:5,yAxisID:'y'},
-      {type:'bar',label:'Actual (BCM)',data:actData,backgroundColor:'#854f0b88',borderColor:'#633806',borderWidth:1.5,borderRadius:5,yAxisID:'y'},
-      {type:'line',label:'% Achievement',data:achData,borderColor:A.green,borderWidth:2.5,pointRadius:5,pointBackgroundColor:achColors,pointBorderColor:achColors,tension:0.3,fill:false,yAxisID:'y2'},
-      {type:'line',label:'100%',data:lbs.map(()=>100),borderColor:'#c0303055',borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false,yAxisID:'y2'}
-    ]},
-    options:{responsive:true,interaction:{mode:'index',intersect:false},
-      plugins:{
-        legend:{labels:{color:A.amber4,font:{size:10},filter:i=>i.text!=='100%'}},
-        tooltip:{callbacks:{label:ctx=>{
-          if(ctx.dataset.yAxisID==='y2') return ctx.dataset.label==='100%'?null:` % Ach: ${ctx.parsed.y!=null?ctx.parsed.y.toFixed(1)+'%':'-'}`;
-          return ` ${ctx.dataset.label}: ${(ctx.parsed.y/1e6).toFixed(2)} M BCM`;
-        }}}
-      },
-      scales:{
-        x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:ytdMode==='monthly'?45:0}},
-        y:{...gridOpts,position:'left',ticks:{...gridOpts.ticks,callback:v=>(v/1e6).toFixed(1)+'M'},title:{display:true,text:'BCM',color:A.textMuted,font:{size:10}}},
-        y2:{...gridOpts,position:'right',min:0,max:140,grid:{display:false},ticks:{...gridOpts.ticks,callback:v=>v+'%'},title:{display:true,text:'% Achievement',color:A.green,font:{size:10}}}
-      }}
-  });
-}
-
-/* ─── WORKING HOURS CHART ─── */
-function renderWH(){
-  if(cWH)cWH.destroy();
-  const whMode = document.getElementById('whView').value;
-  const lines = currentLine==='ALL'?['WA','WB','WN']:[currentLine];
-  const all = mergeLines(lines,'all');
-  const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  const YCOL = {2021:'#fac775',2022:'#ef9f27',2023:'#ba7517',2024:'#854f0b',2025:'#2a7a40'};
-  const datasets = [];
-
-  if(whMode==='actual'){
-    /* หลายปีในกราฟเดียว — เส้น WH Actual ต่อเดือนของแต่ละปี */
-    const years=[...new Set(all.map(r=>r.y))].sort();
-    years.forEach(y=>{
-      const src=all.filter(r=>r.y===y).sort((a,b)=>a.m-b.m);
-      const vals=Array(12).fill(null);
-      src.forEach(r=>{ vals[r.m-1]=r.wa; });
-      datasets.push({
-        label:`${y}`,data:vals,
-        borderColor:YCOL[y]||'#888',backgroundColor:(YCOL[y]||'#888')+'22',
-        borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0.35,fill:false
-      });
-    });
-    cWH=new Chart(document.getElementById('whChart'),{
-      type:'line',
-      data:{labels:MONTHS,datasets},
-      options:{responsive:true,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{labels:{color:A.amber4,font:{size:10}}},
-          tooltip:{callbacks:{label:ctx=>ctx.parsed.y!=null?` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(0)} ชม.`:null}}},
-        scales:{
-          x:{...gridOpts},
-          y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v+' ชม.'},title:{display:true,text:'Working Hours (ชม.)',color:A.textMuted,font:{size:10}}}
-        }}
-    });
-  } else {
-    /* Plan vs Actual ปีที่เลือก (หรือ 2025 ถ้า "ทุกปี") */
-    const year = getYear()==='all' ? 2025 : parseInt(getYear());
-    const src=all.filter(r=>r.y===year).sort((a,b)=>a.m-b.m);
-    const lbs=src.map(r=>MTH[r.m]);
-    const planD=src.map(r=>r.wp);
-    const actD=src.map(r=>r.wa);
-    const diffD=src.map(r=>+(r.wa-r.wp).toFixed(0));
-    datasets.push(
-      {type:'bar',label:`Plan ปี ${year} (ชม.)`,data:planD,backgroundColor:'#fac77555',borderColor:'#ef9f27',borderWidth:1.5,borderRadius:4,yAxisID:'y'},
-      {type:'bar',label:`Actual ปี ${year} (ชม.)`,data:actD,backgroundColor:'#854f0b88',borderColor:'#633806',borderWidth:1.5,borderRadius:4,yAxisID:'y'},
-      {type:'line',label:'Actual − Plan (ชม.)',data:diffD,
-        borderColor:A.green,borderWidth:2,pointRadius:4,
-        pointBackgroundColor:diffD.map(v=>v>=0?A.green:A.red),
-        pointBorderColor:diffD.map(v=>v>=0?A.green:A.red),
-        tension:0.3,fill:false,yAxisID:'y2'}
-    );
-    cWH=new Chart(document.getElementById('whChart'),{
-      data:{labels:lbs,datasets},
-      options:{responsive:true,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{labels:{color:A.amber4,font:{size:10}}},
-          tooltip:{callbacks:{label:ctx=>{
-            if(ctx.dataset.yAxisID==='y2') return ` ส่วนต่าง: ${ctx.parsed.y>=0?'+':''}${ctx.parsed.y} ชม.`;
-            return ` ${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(0)} ชม.`;
-          }}}},
-        scales:{
-          x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},
-          y:{...gridOpts,position:'left',ticks:{...gridOpts.ticks,callback:v=>v+' ชม.'},title:{display:true,text:'Working Hours (ชม.)',color:A.textMuted,font:{size:10}}},
-          y2:{...gridOpts,position:'right',grid:{display:false},ticks:{...gridOpts.ticks,callback:v=>(v>=0?'+':'')+v+' ชม.'},title:{display:true,text:'Actual − Plan',color:A.green,font:{size:10}}}
-        }}
-    });
-  }
-}
-
-/* ─── AVAILABILITY ─── */
-function renderAvail(d){
-  if(cAvail)cAvail.destroy();
-  const avData=d.map(r=>{const t=r.run+r.pm+r.sh+r.sb;return t>0?+(r.run/t*100).toFixed(1):null;});
-  const ptCol=avData.map(v=>v==null?A.gray:v>=70?A.green:v>=50?A.amber3:A.red);
-  cAvail=new Chart(document.getElementById('availChart'),{
-    type:'line',
-    data:{labels:labels(d),datasets:[
-      {label:'Equipment Availability (%)',data:avData,borderColor:A.amber3,backgroundColor:'#ba751715',fill:true,tension:0.35,pointRadius:4,pointBackgroundColor:ptCol,pointBorderColor:ptCol,borderWidth:2.5},
-      {label:'Target 70%',data:d.map(()=>70),borderColor:'#2a7a4099',borderDash:[6,4],borderWidth:1.5,pointRadius:0}
-    ]},
-    options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v+'%'},min:0,max:100,title:{display:true,text:'วัน RUN ÷ วันทั้งหมด × 100',color:A.textMuted,font:{size:9}}}}}
-  });
-}
-
-
-/* ─── PM TREND ─── */
-function renderPMTrend(d){
-  if(cPM)cPM.destroy();
-  cPM=new Chart(document.getElementById('pmChart'),{
-    type:'bar',
-    data:{labels:labels(d),datasets:[
-      {label:'วัน RUN (ผลิต)',data:d.map(r=>r.run),backgroundColor:'#2a7a4055',borderColor:'#2a7a40',borderWidth:1.5,borderRadius:2},
-      {label:'วัน PM/DPM (ซ่อม)',data:d.map(r=>r.pm),backgroundColor:'#c0302066',borderColor:'#c03020',borderWidth:1.5,borderRadius:2},
-      {label:'SHIFT/Stand By',data:d.map(r=>r.sh+r.sb),backgroundColor:'#ef9f2744',borderColor:'#ef9f27',borderWidth:1.5,borderRadius:2}
-    ]},
-    options:{responsive:true,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{labels:{color:A.amber4,font:{size:10}}},
-        tooltip:{callbacks:{afterBody:items=>{const run=items.find(i=>i.datasetIndex===0)?.parsed.y||0;const pm=items.find(i=>i.datasetIndex===1)?.parsed.y||0;const oth=items.find(i=>i.datasetIndex===2)?.parsed.y||0;const tot=run+pm+oth;return tot>0?[`──────────`,`Availability: ${(run/tot*100).toFixed(0)}%`]:[];}}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,title:{display:true,text:'จำนวนวัน',color:A.textMuted,font:{size:10}}}}}
-  });
-}
-
-/* ─── PRODUCTION TABLE ─── */
-function renderProdTable(d){
-  document.getElementById('prodBody').innerHTML=d.map(r=>{
-    const lbl=getView()==='annual'?r.y:`${MTH[r.m]} ${r.y}`;
-    const cls=r.ach>=100?'bg':r.ach>=80?'by':'br';
-    const tot=r.run+r.pm+r.sh+r.sb;
-    const avail=tot>0?(r.run/tot*100).toFixed(0)+'%':'-';
-    const availCls=tot>0&&(r.run/tot*100)>=70?'pos':tot>0&&(r.run/tot*100)>=50?'neu':'neg';
-    const rate=r.wa>0?Math.round(r.pa/r.wa):0;
-    return `<tr><td class="mc">${lbl}</td><td>${(r.pp/1e6).toFixed(2)}M</td><td>${(r.pa/1e6).toFixed(2)}M</td><td><span class="badge ${cls}">${r.ach.toFixed(1)}%</span></td><td class="${availCls}">${avail}</td><td>${r.run}</td><td>${r.pm}</td><td>${r.sh}</td><td>${r.sb}</td><td>${N(rate)}</td></tr>`;
-  }).join('');
-}
-
-/* ─── ELECTRICITY KPI ─── */
-function renderElecKPI(d){
-  const tKWH=d.reduce((s,r)=>s+r.kwh,0);
-  const tBCM=d.reduce((s,r)=>s+r.pa,0);
-  const avgEff=tBCM>0?(tKWH/tBCM).toFixed(2):0;
-  const effVsBase=tBCM>0?(parseFloat(avgEff)-BASELINE).toFixed(2):0;
-  const cards=[
-    {top:A.amber3,lbl:'พลังงานรวม (MWh)',val:N(Math.round(tKWH/1000)),sub:`${(tKWH/1e9).toFixed(2)} GWh | ${d.length} เดือน`},
-    {top:parseFloat(avgEff)<=7?A.green:parseFloat(avgEff)<=9?A.amber3:A.red,lbl:'kWh / BCM เฉลี่ย',val:avgEff,cls:parseFloat(avgEff)<=7?'pos':parseFloat(avgEff)<=9?'neu':'neg',sub:parseFloat(avgEff)<=7?'🟢 ประหยัดพลังงาน':parseFloat(avgEff)<=9?'🟡 เฝ้าระวัง':'🔴 วิกฤต ต้องปรับปรุง'},
-    {top:parseFloat(effVsBase)<=0?A.green:A.red,lbl:'เทียบ Baseline (5.89)',val:(parseFloat(effVsBase)>=0?'+':'')+effVsBase,cls:parseFloat(effVsBase)<=0?'pos':'neg',sub:parseFloat(effVsBase)<=0?'✅ ดีกว่า Baseline':'❌ แย่กว่า Baseline'},
-    {top:A.amber3,lbl:'Production Actual',val:N(Math.round(tBCM/1e6*10)/10),sub:'ล้าน BCM ในช่วงที่เลือก'},
-    {top:A.amber3,lbl:'เดือนที่ดีที่สุด (kWh/BCM)',val:d.length>0?Math.min(...d.filter(r=>r.pa>0).map(r=>r.eff)).toFixed(2):'-',sub:'ค่าต่ำสุดในช่วงที่เลือก = ประหยัดที่สุด'},
-  ];
-  document.getElementById('elecKPI').innerHTML=cards.map(c=>`<div class="kpi-card" style="--top:${c.top}"><div class="lbl">${c.lbl}</div><div class="val ${c.cls||''}">${c.val}</div><div class="sub">${c.sub}</div></div>`).join('');
-}
-
-/* ─── POWER CHART ─── */
-function renderPower(d){
-  if(cPower)cPower.destroy();
-  cPower=new Chart(document.getElementById('powerChart'),{
-    type:'bar',
-    data:{labels:labels(d),datasets:[
-      {label:'พลังงาน (MWh)',data:d.map(r=>Math.round(r.kwh/1000)),backgroundColor:'#4a309066',borderColor:'#4a3090',borderWidth:1.5,borderRadius:4}
-    ]},
-    options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v+' MWh'},title:{display:true,text:'MWh',color:A.textMuted,font:{size:10}}}}}
-  });
-}
-
-/* ─── ANNUAL BAR ─── */
-function renderAnnual(){
-  if(cAnnual)cAnnual.destroy();
-  const lines=currentLine==='ALL'?['WA','WB','WN']:[currentLine];
-  const all=mergeLines(lines,'all');
-  const agg={};
-  all.forEach(r=>{if(!agg[r.y])agg[r.y]={kwh:0,pa:0};agg[r.y].kwh+=r.kwh;agg[r.y].pa+=r.pa;});
-  const years=Object.keys(agg).sort();
-  const effs=years.map(y=>agg[y].pa>0?+(agg[y].kwh/agg[y].pa).toFixed(2):0);
-  const effColors=effs.map(v=>v<=7?'#2a7a4088':v<=9?'#ba751788':'#c0302088');
-  const effBorders=effs.map(v=>v<=7?'#2a7a40':v<=9?'#ba7517':'#c03020');
-  cAnnual=new Chart(document.getElementById('annualBar'),{
-    type:'bar',
-    data:{labels:years,datasets:[
-      {label:'kWh/BCM เฉลี่ยรายปี',data:effs,backgroundColor:effColors,borderColor:effBorders,borderWidth:1.5,borderRadius:6},
-      {label:`Baseline ${BASELINE}`,data:years.map(()=>BASELINE),type:'line',borderColor:'#c0303088',borderDash:[6,4],borderWidth:2,pointRadius:0}
-    ]},
-    options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
-      scales:{x:{...gridOpts},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v.toFixed(1)},title:{display:true,text:'kWh/BCM',color:A.textMuted,font:{size:10}},min:4,max:12}}}
-  });
-}
-
-/* ─── EFF TREND ─── */
-function renderEff(d){
-  if(cEff)cEff.destroy();
-  const effData=d.map(r=>r.pa>0?r.eff:null);
-  const ptCol=effData.map(v=>v==null?A.gray:v<=7?A.green:v<=9?A.amber3:A.red);
-  const roll=effData.map((_,i,arr)=>{
-    const vals=arr.slice(Math.max(0,i-2),i+1).filter(v=>v!=null);
-    return vals.length>0?+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):null;
-  });
-  cEff=new Chart(document.getElementById('effChart'),{
-    data:{labels:labels(d),datasets:[
-      {type:'line',label:'kWh/BCM รายเดือน',data:effData,borderColor:'#4a3090',backgroundColor:'#4a309015',fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:ptCol,pointBorderColor:ptCol,borderWidth:2},
-      {type:'line',label:'3-Month Rolling Avg',data:roll,borderColor:A.amber3,borderDash:[5,3],borderWidth:2,pointRadius:0,fill:false},
-      {type:'line',label:`Baseline ${BASELINE}`,data:d.map(()=>BASELINE),borderColor:'#c0303066',borderDash:[8,4],borderWidth:1.5,pointRadius:0,fill:false}
-    ]},
-    options:{responsive:true,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{labels:{color:A.amber4,font:{size:10}}},
-        tooltip:{callbacks:{label:ctx=>ctx.parsed.y!=null?` ${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}`:null}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v.toFixed(1)},title:{display:true,text:'kWh/BCM',color:A.textMuted,font:{size:10}},min:4,max:12}}}
-  });
-}
-
-/* ─── EFF BAR ─── */
-function renderEffBar(d){
-  if(cEffBar)cEffBar.destroy();
-  const effData=d.map(r=>r.pa>0?r.eff:null);
-  const effColors=effData.map(v=>v==null?A.gray+'44':v<=7?'#2a7a4066':v<=9?'#ba751766':'#c0302066');
-  const effBorders=effData.map(v=>v==null?A.gray:v<=7?A.green:v<=9?A.amber3:A.red);
-  cEffBar=new Chart(document.getElementById('effBarChart'),{
-    type:'bar',
-    data:{labels:labels(d),datasets:[
-      {label:'kWh/BCM',data:effData,backgroundColor:effColors,borderColor:effBorders,borderWidth:1.5,borderRadius:4},
-      {label:'Target 7',data:d.map(()=>7),type:'line',borderColor:'#2a7a4066',borderDash:[6,4],borderWidth:1.5,pointRadius:0},
-      {label:'Target 9',data:d.map(()=>9),type:'line',borderColor:'#c0302066',borderDash:[6,4],borderWidth:1.5,pointRadius:0}
-    ]},
-    options:{responsive:true,plugins:{legend:{labels:{color:A.amber4,font:{size:10}}}},
-      scales:{x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>v.toFixed(1)},title:{display:true,text:'kWh/BCM',color:A.textMuted,font:{size:10}},min:4,max:12}}}
-  });
-}
-
-/* ─── ELECTRICITY TABLE ─── */
-function renderElecTable(d){
-  let prev=null;
-  document.getElementById('elecBody').innerHTML=d.map(r=>{
-    const lbl=getView()==='annual'?r.y:`${MTH[r.m]} ${r.y}`;
-    const mwh=Math.round(r.kwh/1000);
-    const eff=r.pa>0?r.eff.toFixed(2):'-';
-    const vsBase=r.pa>0?(r.eff-BASELINE).toFixed(2):'-';
-    const vsCls=r.pa>0?r.eff<=BASELINE?'pos2':'neg2':'';
-    const vsSign=r.pa>0?(r.eff-BASELINE)>=0?'+':'':'';
-    let yoy='-', yoyCls='';
-    if(prev&&r.pa>0&&prev.pa>0){const diff=r.eff-prev.eff;yoy=(diff>=0?'+':'')+diff.toFixed(2);yoyCls=diff<=0?'pos2':'neg2';}
-    prev=r;
-    return `<tr><td class="mc">${lbl}</td><td>${N(Math.round(r.pa))}</td><td>${N(mwh)} MWh</td><td>${eff}</td><td class="${vsCls}">${vsSign}${vsBase}</td><td class="${yoyCls}">${yoy}</td></tr>`;
-  }).join('');
-}
-
-/* ════════════ SETTINGS ════════════ */
-function extractSheetId(input){
-  const m=input.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-  return m?m[1]:input.trim();
-}
-function openSettings(){
-  document.getElementById('sheetIdInput').value=localStorage.getItem('sheetId')||'';
-  document.getElementById('urlScript').value=localStorage.getItem('scriptUrl')||'';
-  document.getElementById('settingsModal').classList.add('open');
-}
-function closeSettings(){ document.getElementById('settingsModal').classList.remove('open'); }
-
-function saveAndLoad(){
-  const raw=document.getElementById('sheetIdInput').value.trim();
-  const sid=extractSheetId(raw);
-  if(sid){
-    localStorage.setItem('sheetId',sid);
-    const base=`https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:csv&sheet=`;
-    ['WA','WB','WN'].forEach(l=>{
-      localStorage.setItem('sheetUrl_'+l,base+l);
-      localStorage.setItem('sheetUrl_'+l+'_daily',base+l+'_daily');
-      localStorage.setItem('sheetUrl_'+l+'_hourly',base+l+'_hourly');
-      localStorage.setItem('sheetUrl_'+l+'_downtime',base+l+'_downtime');
-    });
-  }
-  const sc=document.getElementById('urlScript').value.trim();
-  if(sc) localStorage.setItem('scriptUrl',sc);
-  closeSettings();
-  loadFromSheets();
-  loadDailyData();
-}
-
-/* ════════════ CSV PARSER ════════════ */
-function parseCSV(text){
-  const lines=text.trim().split(/\r?\n/);
-  if(lines.length<2) return [];
-  const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
-  return lines.slice(1).map(line=>{
-    const vals=[]; let cur='', inQ=false;
-    for(const ch of line){
-      if(ch==='"'){inQ=!inQ;}
-      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
-      else cur+=ch;
-    }
-    vals.push(cur.trim());
-    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
-    return {
-      y:parseInt(obj['year']||obj['y'])||0,
-      m:parseInt(obj['month']||obj['m'])||0,
-      pp:parseFloat(obj['plan_bcm']||obj['pp'])||0,
-      pa:parseFloat(obj['actual_bcm']||obj['pa'])||0,
-      wp:parseFloat(obj['wh_plan']||obj['wp'])||0,
-      wa:parseFloat(obj['wh_actual']||obj['wa'])||0,
-      kwh:parseFloat(obj['kwh'])||0,
-      eff:0, ach:0,
-      run:parseInt(obj['days_run']||obj['run'])||0,
-      pm:parseInt(obj['days_pm']||obj['pm'])||0,
-      sh:parseInt(obj['days_shift']||obj['sh'])||0,
-      sb:parseInt(obj['days_standby']||obj['sb'])||0
-    };
-  }).filter(r=>r.y>2000&&r.m>=1&&r.m<=12&&(r.pp>0||r.pa>0));
-}
-
-/* ════════════ LOAD FROM SHEETS ════════════ */
-async function loadFromSheets(){
-  const lines=['WA','WB','WN'];
-  const urls=lines.map(l=>localStorage.getItem('sheetUrl_'+l));
-  const hasAny=urls.some(u=>u);
-  if(!hasAny){ openSettings(); return; }
-
-  const statusBar=document.getElementById('sheetStatusBar');
-  const statusText=document.getElementById('sheetStatusText');
-  statusBar.style.display='block';
-  statusText.textContent='⏳ กำลังโหลดข้อมูลจาก Google Sheet…';
-
-  let loaded=[], failed=[];
-  await Promise.all(lines.map(async(l,i)=>{
-    const url=urls[i]; if(!url) return;
-    try{
-      const resp=await fetch(url);
-      if(!resp.ok) throw new Error('HTTP '+resp.status);
-      const text=await resp.text();
-      const rows=parseCSV(text);
-      if(rows.length===0) throw new Error('ไม่พบข้อมูลในชีต');
-      DATA[l]=rows; loaded.push(l);
-    } catch(e){ failed.push(`${l} (${e.message})`); }
-  }));
-
-  const years=[...new Set(Object.values(DATA).flat().map(r=>r.y))].sort();
-  const ys=document.getElementById('yearSelect');
-  const cur=ys.value;
-  ys.innerHTML=`<option value="all">ทุกปี (${years[0]}–${years[years.length-1]})</option>`
-    +years.map(y=>`<option value="${y}">${y}</option>`).join('');
-  if(years.includes(parseInt(cur))) ys.value=cur;
-
-  const now=new Date().toLocaleString('th-TH',{dateStyle:'medium',timeStyle:'short'});
-  if(loaded.length>0){
-    statusText.textContent=`✅ โหลดสำเร็จ: Line ${loaded.join(', ')} | อัปเดต ${now}${failed.length?' | ⚠️ ล้มเหลว: '+failed.join(', '):''}`;
-    document.getElementById('lastUpdate').textContent='อัปเดต: '+now;
-    document.getElementById('refreshBtn').style.display='';
-    updateAll();
-  } else {
-    statusText.textContent=`❌ โหลดไม่สำเร็จ: ${failed.join(', ')} — ตรวจสอบลิงก์และการตั้งค่า Publish`;
-    statusBar.style.background='#fce8e6';
-  }
-}
-
-/* ════════════ DATA ENTRY ════════════ */
-function openDataEntry(){
-  const now = new Date();
-  document.getElementById('eYearM').value = now.getFullYear();
-  document.getElementById('eMonthM').value = now.getMonth()+1;
-  document.getElementById('eYearD').value = now.getFullYear();
-  document.getElementById('eMonthD').value = now.getMonth()+1;
-  const ln = currentLine==='ALL'?'WA':currentLine;
-  document.getElementById('eLineM').value = ln;
-  document.getElementById('eLineD').value = ln;
-  document.getElementById('dataEntryModal').classList.add('open');
-}
-function closeDataEntry(){ document.getElementById('dataEntryModal').classList.remove('open'); }
-
-function setEntryTab(tab, btn){
-  currentEntryTab = tab;
-  document.querySelectorAll('.mtab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('entryMonthly').classList.toggle('active', tab==='monthly');
-  document.getElementById('entryDaily').classList.toggle('active', tab==='daily');
-}
-
-async function submitEntry(){
-  const scriptUrl = localStorage.getItem('scriptUrl');
-  if(!scriptUrl){
-    alert('⚠️ ยังไม่ได้ตั้งค่า Google Apps Script URL\n\nไปที่ 🔗 เชื่อม Google Sheet → ช่อง "Google Apps Script URL" แล้วกรอก URL ที่ได้จากการ Deploy');
-    return;
-  }
-  if(currentEntryTab==='monthly') await submitMonthlyEntry(scriptUrl);
-  else await submitDailyEntry(scriptUrl);
-}
-
-async function submitMonthlyEntry(scriptUrl){
-  const msg = document.getElementById('entryMsgM');
-  const data = {
-    type:'monthly',
-    line: document.getElementById('eLineM').value,
-    year: parseInt(document.getElementById('eYearM').value)||0,
-    month: parseInt(document.getElementById('eMonthM').value)||0,
-    plan_bcm: parseFloat(document.getElementById('ePlanBCM').value)||0,
-    actual_bcm: parseFloat(document.getElementById('eActualBCM').value)||0,
-    wh_plan: parseFloat(document.getElementById('eWHPlan').value)||0,
-    wh_actual: parseFloat(document.getElementById('eWHActual').value)||0,
-    kwh: parseFloat(document.getElementById('eKWH').value)||0,
-    days_run: parseInt(document.getElementById('eDayRun').value)||0,
-    days_pm: parseInt(document.getElementById('eDayPM').value)||0,
-    days_shift: parseInt(document.getElementById('eDayShift').value)||0,
-    days_standby: parseInt(document.getElementById('eDaySB').value)||0
-  };
-  if(!data.year||!data.month||!data.plan_bcm||!data.actual_bcm){
-    msg.className='emsg err'; msg.textContent='⚠️ กรุณากรอก ปี, เดือน, Plan BCM และ Actual BCM ให้ครบ'; return;
-  }
-  msg.className='emsg'; msg.style.display='block'; msg.textContent='⏳ กำลังบันทึก…';
-  try {
-    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
-    msg.className='emsg ok'; msg.textContent='✅ บันทึกสำเร็จ! ข้อมูลเดือน '+MTH[data.month]+' '+data.year+' Line '+data.line+' เข้า Google Sheet แล้ว';
-    ['ePlanBCM','eActualBCM','eWHPlan','eWHActual','eKWH','eDayRun','eDayPM','eDayShift','eDaySB'].forEach(id=>document.getElementById(id).value='');
-  } catch(e){ msg.className='emsg err'; msg.textContent='❌ Error: '+e.message; }
-}
-
-async function submitDailyEntry(scriptUrl){
-  const msg = document.getElementById('entryMsgD');
-  const data = {
-    type:'daily',
-    line: document.getElementById('eLineD').value,
-    year: parseInt(document.getElementById('eYearD').value)||0,
-    month: parseInt(document.getElementById('eMonthD').value)||0,
-    day: parseInt(document.getElementById('eDayD').value)||0,
-    bcm: parseFloat(document.getElementById('eBCM').value)||0,
-    kwh: parseFloat(document.getElementById('eKWHD').value)||0,
-    wh: parseFloat(document.getElementById('eWHD').value)||0
-  };
-  if(!data.year||!data.month||!data.day){
-    msg.className='emsg err'; msg.textContent='⚠️ กรุณากรอก ปี, เดือน และวันที่ให้ครบ'; return;
-  }
-  msg.className='emsg'; msg.style.display='block'; msg.textContent='⏳ กำลังบันทึก…';
-  try {
-    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
-    msg.className='emsg ok'; msg.textContent='✅ บันทึกสำเร็จ! ข้อมูลวันที่ '+data.day+' '+MTH[data.month]+' '+data.year+' เข้า Google Sheet แล้ว';
-    const l = data.line;
-    DAILY_DATA[l] = DAILY_DATA[l].filter(r=>!(r.y===data.year&&r.m===data.month&&r.d===data.day));
-    if(data.bcm||data.kwh||data.wh) DAILY_DATA[l].push({y:data.year,m:data.month,d:data.day,bcm:data.bcm,kwh:data.kwh,wh:data.wh});
-    ['eDayD','eBCM','eKWHD','eWHD'].forEach(id=>document.getElementById(id).value='');
-    if(currentSection==='daily') renderDailySection();
-  } catch(e){ msg.className='emsg err'; msg.textContent='❌ Error: '+e.message; }
-}
-
-/* ════════════ DAILY TABLE ════════════ */
-function parseDailyCSV(text){
-  const lines = text.trim().split(/\r?\n/);
-  if(lines.length<2) return [];
-  const hdr = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
-  return lines.slice(1).map(line=>{
-    const vals=[]; let cur='', inQ=false;
-    for(const ch of line){
-      if(ch==='"'){inQ=!inQ;}
-      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
-      else cur+=ch;
-    }
-    vals.push(cur.trim());
-    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
-    return {
-      y:parseInt(obj['year']||obj['y'])||0, m:parseInt(obj['month']||obj['m'])||0,
-      d:parseInt(obj['day']||obj['d'])||0, bcm:parseFloat(obj['bcm'])||0,
-      kwh:parseFloat(obj['kwh'])||0, wh:parseFloat(obj['wh'])||0
-    };
-  }).filter(r=>r.y>2000&&r.m>=1&&r.m<=12&&r.d>=1&&r.d<=31);
-}
-
-async function loadDailyData(){
-  const note = document.getElementById('dailyNote');
-  note.textContent='⏳ กำลังโหลด…';
-  let ok=[], fail=[];
-  await Promise.all(['WA','WB','WN'].map(async l=>{
-    const url = localStorage.getItem('sheetUrl_'+l+'_daily');
-    if(!url) return;
-    try{
-      const resp = await fetch(url);
-      const text = await resp.text();
-      const rows = parseDailyCSV(text);
-      DAILY_DATA[l] = rows; ok.push(l);
-    } catch(e){ fail.push(l+' ('+e.message+')'); }
-  }));
-  if(ok.length) note.textContent='✅ โหลดสำเร็จ: Line '+ok.join(', ')+(fail.length?' | ⚠️ ล้มเหลว: '+fail.join(', '):'');
-  else if(fail.length) note.textContent='❌ โหลดไม่สำเร็จ: '+fail.join(', ');
-  else note.textContent='ℹ️ ยังไม่ได้ตั้งค่า Daily Sheet URL (ไปที่ 🔗 เชื่อม Google Sheet)';
-  renderDailySection();
-}
-
-function renderDailySection(){
-  const line = currentLine==='ALL'?'WA':currentLine;
-  const year  = parseInt(document.getElementById('dailyYear').value)||2025;
-  const month = parseInt(document.getElementById('dailyMonth').value)||1;
-  const data  = (DAILY_DATA[line]||[]).filter(r=>r.y===year&&r.m===month).sort((a,b)=>a.d-b.d);
-
-  document.getElementById('dailyTitle').textContent =
-    `📅 รายละเอียดรายวัน — Line ${line} | ${MTH[month]} ${year}`;
-
-  const tbody = document.getElementById('dailyBody');
-  if(data.length===0){
-    tbody.innerHTML='<tr><td colspan="6" style="text-align:center;color:#a07030;padding:24px;">ไม่มีข้อมูลรายวันสำหรับ Line '+line+' '+MTH[month]+' '+year+'<br><small>กด 📝 กรอกข้อมูล หรือตั้งค่า Daily Sheet URL แล้วกด 🔄 โหลดข้อมูลรายวัน</small></td></tr>';
-    return;
-  }
-
-  let tBCM=0, tKWH=0, tWH=0;
-  const rows = data.map(r=>{
-    tBCM+=r.bcm; tKWH+=r.kwh; tWH+=r.wh;
-    const eff = r.bcm>0?(r.kwh/r.bcm).toFixed(2):'-';
-    const bhr = r.wh>0?N(Math.round(r.bcm/r.wh)):'-';
-    const effCls = r.bcm>0?(r.kwh/r.bcm)<=7?'pos2':(r.kwh/r.bcm)<=9?'neu':'neg2':'';
-    return `<tr>
-      <td class="mc">${r.d} ${MTH[r.m]}</td>
-      <td>${N(r.bcm)}</td>
-      <td>${N(Math.round(r.kwh))}</td>
-      <td>${r.wh>0?r.wh.toFixed(1):'-'}</td>
-      <td><span class="${effCls}">${eff}</span></td>
-      <td>${bhr}</td>
-    </tr>`;
-  });
-  const avgEff = tBCM>0?(tKWH/tBCM).toFixed(2):'-';
-  const avgBhr = tWH>0?N(Math.round(tBCM/tWH)):'-';
-  rows.push(`<tr class="daily-sum">
-    <td class="mc">รวม / เฉลี่ย (${data.length} วัน)</td>
-    <td>${N(Math.round(tBCM))}</td>
-    <td>${N(Math.round(tKWH))}</td>
-    <td>${tWH.toFixed(1)}</td>
-    <td>${avgEff}</td>
-    <td>${avgBhr}</td>
-  </tr>`);
-  tbody.innerHTML = rows.join('');
-}
-
-/* ════════════ REALTIME DATA ════════════ */
-const HOURLY_DATA   = {WA:[],WB:[],WN:[]};
-const DOWNTIME_DATA = {WA:[],WB:[],WN:[]};
-let cHourly, currentRtTab = 'hourly';
-
-function initRtDate(){
-  const d = new Date();
-  document.getElementById('rtDate').value = d.toISOString().split('T')[0];
-  document.getElementById('rtDateH').value = d.toISOString().split('T')[0];
-  document.getElementById('rtDateDT').value = d.toISOString().split('T')[0];
-  document.getElementById('rtHourH').value = d.getHours();
-}
-
-function openRtEntry(){
-  const ln = currentLine==='ALL'?'WA':currentLine;
-  document.getElementById('rtLineH').value = ln;
-  document.getElementById('rtLineDT').value = ln;
-  document.getElementById('rtEntryModal').classList.add('open');
-}
-function closeRtEntry(){ document.getElementById('rtEntryModal').classList.remove('open'); }
-
-function setRtTab(tab, btn){
-  currentRtTab = tab;
-  document.querySelectorAll('#rtEntryModal .mtab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  document.getElementById('rtPaneH').classList.toggle('active', tab==='hourly');
-  document.getElementById('rtPaneDT').classList.toggle('active', tab==='downtime');
-}
-
-function submitRtEntry(){
-  const scriptUrl = localStorage.getItem('scriptUrl');
-  if(!scriptUrl){ alert('⚠️ ยังไม่ได้ตั้งค่า Google Apps Script URL'); return; }
-  if(currentRtTab==='hourly') submitHourlyEntry(scriptUrl);
-  else submitDowntimeEntry(scriptUrl);
-}
-
-async function submitHourlyEntry(scriptUrl){
-  const msg = document.getElementById('rtMsgH');
-  const dateVal = document.getElementById('rtDateH').value;
-  if(!dateVal){ msg.className='emsg err'; msg.textContent='⚠️ กรุณาเลือกวันที่'; return; }
-  const [yr,mo,dy] = dateVal.split('-').map(Number);
-  const data = {
-    type:'hourly', line:document.getElementById('rtLineH').value,
-    year:yr, month:mo, day:dy,
-    hour:parseInt(document.getElementById('rtHourH').value)||0,
-    bcm:parseFloat(document.getElementById('rtBCMH').value)||0,
-    current_a:parseFloat(document.getElementById('rtCurrentH').value)||0,
-    notes:document.getElementById('rtNoteH').value||''
-  };
-  if(!data.year || data.hour<0 || data.hour>23){
-    msg.className='emsg err'; msg.textContent='⚠️ กรุณากรอกข้อมูลให้ครบ'; return;
-  }
-  msg.className='emsg'; msg.style.display='block'; msg.textContent='⏳ กำลังบันทึก…';
-  try{
-    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
-    msg.className='emsg ok'; msg.textContent=`✅ บันทึก BCM ชั่วโมง ${data.hour}:00 Line ${data.line} สำเร็จ!`;
-    const l=data.line;
-    HOURLY_DATA[l]=HOURLY_DATA[l].filter(r=>!(r.y===yr&&r.m===mo&&r.d===dy&&r.h===data.hour));
-    if(data.bcm||data.current_a) HOURLY_DATA[l].push({y:yr,m:mo,d:dy,h:data.hour,bcm:data.bcm,current:data.current_a,notes:data.notes});
-    document.getElementById('rtBCMH').value=''; document.getElementById('rtCurrentH').value=''; document.getElementById('rtNoteH').value='';
-    if(currentSection==='realtime') renderRealtimeSection();
-  } catch(e){ msg.className='emsg err'; msg.textContent='❌ Error: '+e.message; }
-}
-
-async function submitDowntimeEntry(scriptUrl){
-  const msg = document.getElementById('rtMsgDT');
-  const dateVal = document.getElementById('rtDateDT').value;
-  if(!dateVal){ msg.className='emsg err'; msg.textContent='⚠️ กรุณาเลือกวันที่'; return; }
-  const [yr,mo,dy] = dateVal.split('-').map(Number);
-  const startT = document.getElementById('rtStartDT').value;
-  const endT   = document.getElementById('rtEndDT').value;
-  const cause  = document.getElementById('rtCauseDT').value.trim();
-  if(!startT||!cause){ msg.className='emsg err'; msg.textContent='⚠️ กรุณากรอก เวลาเริ่ม และ สาเหตุ'; return; }
-  let dur=0;
-  if(startT&&endT){
-    const [sh,sm]=[...startT.split(':').map(Number)];
-    const [eh,em]=[...endT.split(':').map(Number)];
-    dur=(eh*60+em)-(sh*60+sm); if(dur<0) dur+=1440;
-  }
-  const data = {
-    type:'downtime', line:document.getElementById('rtLineDT').value,
-    year:yr, month:mo, day:dy,
-    start_time:startT, end_time:endT,
-    machine:document.getElementById('rtMachineDT').value,
-    cause:cause,
-    type_dt:document.getElementById('rtTypeDT').value,
-    duration_min:dur
-  };
-  msg.className='emsg'; msg.style.display='block'; msg.textContent='⏳ กำลังบันทึก…';
-  try{
-    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
-    msg.className='emsg ok'; msg.textContent=`✅ บันทึก Downtime ${data.machine} เริ่ม ${startT} Line ${data.line} สำเร็จ!`;
-    const l=data.line;
-    DOWNTIME_DATA[l].push({y:yr,m:mo,d:dy,start:startT,end:endT,machine:data.machine,cause,typedt:data.type_dt,dur});
-    document.getElementById('rtStartDT').value=''; document.getElementById('rtEndDT').value=''; document.getElementById('rtCauseDT').value='';
-    if(currentSection==='realtime') renderRealtimeSection();
-  } catch(e){ msg.className='emsg err'; msg.textContent='❌ Error: '+e.message; }
-}
-
-function parseHourlyCSV(text){
-  const lines=text.trim().split(/\r?\n/); if(lines.length<2) return [];
-  const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
-  return lines.slice(1).map(line=>{
-    const vals=[]; let cur='',inQ=false;
-    for(const ch of line){ if(ch==='"'){inQ=!inQ;} else if(ch===','&&!inQ){vals.push(cur.trim());cur='';} else cur+=ch; }
-    vals.push(cur.trim());
-    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
-    return {y:parseInt(obj['year'])||0,m:parseInt(obj['month'])||0,d:parseInt(obj['day'])||0,
-      h:parseInt(obj['hour'])||0,bcm:parseFloat(obj['bcm'])||0,
-      current:parseFloat(obj['current_a'])||0,notes:obj['notes']||''};
-  }).filter(r=>r.y>2000&&r.m>=1&&r.d>=1);
-}
-
-function parseDowntimeCSV(text){
-  const lines=text.trim().split(/\r?\n/); if(lines.length<2) return [];
-  const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
-  return lines.slice(1).map(line=>{
-    const vals=[]; let cur='',inQ=false;
-    for(const ch of line){ if(ch==='"'){inQ=!inQ;} else if(ch===','&&!inQ){vals.push(cur.trim());cur='';} else cur+=ch; }
-    vals.push(cur.trim());
-    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
-    return {y:parseInt(obj['year'])||0,m:parseInt(obj['month'])||0,d:parseInt(obj['day'])||0,
-      start:obj['start_time']||'',end:obj['end_time']||'',
-      machine:obj['machine']||'',cause:obj['cause']||'',
-      typedt:obj['type']||'',dur:parseInt(obj['duration_min'])||0};
-  }).filter(r=>r.y>2000);
-}
-
-async function loadRealtimeData(){
-  const note = document.getElementById('rtNote');
-  note.textContent='⏳ กำลังโหลด…';
-  let ok=[],fail=[];
-  const tasks=[];
-  ['WA','WB','WN'].forEach(l=>{
-    tasks.push((async()=>{
-      const u=localStorage.getItem('sheetUrl_'+l+'_hourly');
-      if(!u) return;
-      try{ const r=await fetch(u); HOURLY_DATA[l]=parseHourlyCSV(await r.text()); ok.push(l+'_hourly'); }
-      catch(e){ fail.push(l+'_hourly'); }
-    })());
-    tasks.push((async()=>{
-      const u=localStorage.getItem('sheetUrl_'+l+'_downtime');
-      if(!u) return;
-      try{ const r=await fetch(u); DOWNTIME_DATA[l]=parseDowntimeCSV(await r.text()); ok.push(l+'_downtime'); }
-      catch(e){ fail.push(l+'_downtime'); }
-    })());
-  });
-  await Promise.all(tasks);
-  if(ok.length) note.textContent=`✅ โหลดสำเร็จ: ${ok.join(', ')}`;
-  else if(fail.length) note.textContent=`❌ โหลดไม่สำเร็จ: ${fail.join(', ')} (อาจยังไม่มีข้อมูล)`;
-  else note.textContent='ℹ️ ยังไม่มี Sheet Hourly/Downtime — กด 📝 CCR กรอกข้อมูล เพื่อเริ่มต้น';
-  renderRealtimeSection();
-}
-
-function renderRealtimeSection(){
-  const line = currentLine==='ALL'?'WA':currentLine;
-  const dateStr = document.getElementById('rtDate').value;
-  if(!dateStr) return;
-  const [yr,mo,dy] = dateStr.split('-').map(Number);
-
-  const hourlyDay = (HOURLY_DATA[line]||[]).filter(r=>r.y===yr&&r.m===mo&&r.d===dy).sort((a,b)=>a.h-b.h);
-  const dtDay     = (DOWNTIME_DATA[line]||[]).filter(r=>r.y===yr&&r.m===mo&&r.d===dy).sort((a,b)=>a.start.localeCompare(b.start));
-
-  document.getElementById('rtChartTitle').textContent = `📊 BCM รายชั่วโมง — Line ${line} | ${dy}/${mo}/${yr}`;
-
-  /* KPI */
-  const totalBCM   = hourlyDay.reduce((s,r)=>s+r.bcm,0);
-  const lastCur    = hourlyDay.length>0?hourlyDay[hourlyDay.length-1].current:0;
-  const totalDT    = dtDay.reduce((s,r)=>s+r.dur,0);
-  const avgRate    = hourlyDay.length>0?Math.round(totalBCM/hourlyDay.length):0;
-  const unplanned  = dtDay.filter(r=>r.typedt==='unplanned').length;
-
-  const kpi=[
-    {top:'#ba7517',lbl:'BCM วันนี้ (สะสม)',val:N(Math.round(totalBCM)),sub:`${hourlyDay.length} ชั่วโมงที่บันทึก`},
-    {top:lastCur>0?'#4a3090':'#a07050',lbl:'กระแสไฟล่าสุด (A)',val:lastCur>0?lastCur.toFixed(1):'-',sub:'Ampere — ชั่วโมงล่าสุด'},
-    {top:totalDT>60?'#c03020':totalDT>0?'#ba7517':'#2a7a40',lbl:'Downtime วันนี้',val:totalDT>0?`${Math.floor(totalDT/60)}ชม. ${totalDT%60}นาที`:'0 นาที',cls:totalDT>60?'neg':totalDT>0?'neu':'pos',sub:`${dtDay.length} เหตุการณ์`},
-    {top:'#2a7a40',lbl:'BCM ต่อชั่วโมง (เฉลี่ย)',val:N(avgRate),sub:'BCM/hr วันนี้'},
-    {top:unplanned>0?'#c03020':'#2a7a40',lbl:'Unplanned Downtime',val:unplanned,cls:unplanned>0?'neg':'pos',sub:`Planned: ${dtDay.filter(r=>r.typedt==='planned').length} ครั้ง`}
-  ];
-  document.getElementById('rtKPI').innerHTML=kpi.map(c=>`<div class="kpi-card" style="--top:${c.top}"><div class="lbl">${c.lbl}</div><div class="val ${c.cls||''}">${c.val}</div><div class="sub">${c.sub}</div></div>`).join('');
-
-  /* Hourly chart */
-  const hrs=Array.from({length:24},(_,i)=>`${i}:00`);
-  const bcmH=Array(24).fill(null);
-  hourlyDay.forEach(r=>{bcmH[r.h]=r.bcm;});
-  if(cHourly) cHourly.destroy();
-  cHourly=new Chart(document.getElementById('rtHourlyChart'),{
-    type:'bar',
-    data:{labels:hrs,datasets:[{
-      label:`BCM/ชม. — Line ${line}`,data:bcmH,
-      backgroundColor:bcmH.map(v=>v===null?'#f0d8a044':'#ba751788'),
-      borderColor:bcmH.map(v=>v===null?'#f0d8a0':'#633806'),
-      borderWidth:1.5,borderRadius:4
-    }]},
-    options:{responsive:true,
-      plugins:{legend:{labels:{color:A.amber4,font:{size:10}}},
-        tooltip:{callbacks:{label:ctx=>ctx.parsed.y!=null?` BCM: ${N(ctx.parsed.y)}`:' ยังไม่มีข้อมูล'}}},
-      scales:{
-        x:{...gridOpts,ticks:{...gridOpts.ticks,maxRotation:45}},
-        y:{...gridOpts,ticks:{...gridOpts.ticks,callback:v=>N(v)},title:{display:true,text:'BCM',color:A.textMuted,font:{size:10}}}
-      }}
-  });
-
-  /* Machine status */
-  const activeDT=new Set(dtDay.filter(r=>r.end===''||r.end==null).map(r=>r.machine));
-  const machines=['BWE','Crusher','Conveyor','Spreader'];
-  document.getElementById('rtMachineStatus').innerHTML=machines.map(m=>{
-    const down=activeDT.has(m);
-    const cnt=dtDay.filter(r=>r.machine===m).length;
-    return `<div class="machine-card ${down?'machine-down':'machine-ok'}">
-      <span style="font-size:22px;">${down?'🔴':'🟢'}</span>
-      <div><div class="machine-name">${m}</div>
-      <div class="machine-sub">${down?'⚠️ Downtime ยังดำเนินอยู่':'ทำงานปกติ'} | DT วันนี้: ${cnt} ครั้ง</div></div>
-    </div>`;
-  }).join('');
-
-  /* Downtime table */
-  const dtTotal=dtDay.reduce((s,r)=>s+r.dur,0);
-  document.getElementById('rtDTSummary').textContent=dtDay.length>0?`รวม ${dtTotal} นาที (${Math.floor(dtTotal/60)}ชม. ${dtTotal%60}นาที)`:'';
-  document.getElementById('rtDTBody').innerHTML=dtDay.length===0
-    ?'<tr><td colspan="7" style="text-align:center;color:#2a7a40;padding:24px;">✅ ไม่มีเหตุการณ์ Downtime ในวันนี้</td></tr>'
-    :dtDay.map(r=>{
-      const tc=r.typedt==='unplanned'?'neg2':'pos2';
-      const tl=r.typedt==='unplanned'?'🔴 Unplanned':'🟢 Planned';
-      return `<tr><td class="mc">${r.d}/${r.m}/${r.y}</td><td>${r.start}</td><td>${r.end||'—'}</td><td class="${tc}">${r.dur>0?r.dur:'—'}</td><td><span class="badge by">${r.machine}</span></td><td>${r.cause}</td><td class="${tc}">${tl}</td></tr>`;
-    }).join('');
-}
-
-/* ── auto-load on open if URLs already saved ── */
-window.addEventListener('load', ()=>{
-  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l))){
-    loadFromSheets();
-  }
-  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l+'_daily'))){
-    loadDailyData();
-  }
-  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l+'_hourly'))){
-    loadRealtimeData();
-  }
-  initRtDate();
-});
-
-updateAll();
+tick(); setInterval(tick, 30000);
 </script>
 </body>
 </html>
