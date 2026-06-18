@@ -134,6 +134,73 @@ select:focus{outline:none;border-color:var(--accent)}
   margin-top:10px;padding:8px 14px;background:#fef3c7;border-radius:8px;
   border-left:3px solid var(--shift);font-size:.78rem;color:#92400e;
 }
+
+/* ══ REALTIME MONITOR ══ */
+.view-toggle{display:flex;gap:3px;background:#f1f5f9;padding:3px;border-radius:10px}
+.vt-btn{padding:5px 16px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:.8rem;background:transparent;color:var(--sub);transition:all .18s;white-space:nowrap}
+.vt-btn.active.v-daily{background:#fff;color:var(--accent);box-shadow:0 1px 4px rgba(37,99,235,.2)}
+.vt-btn.active.v-rt{background:#fff;color:#dc2626;box-shadow:0 1px 4px rgba(220,38,38,.2)}
+.rt-wrap{padding:20px 28px 28px;display:none}
+.rt-wrap.show{display:block}
+.rt-ctrl-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px 16px;margin-bottom:16px}
+.rt-ctrl-bar label{font-size:.78rem;font-weight:600;color:#64748b}
+.rt-ctrl-bar input[type="date"]{padding:5px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.84rem;color:var(--text);background:#fff;cursor:pointer;outline:none}
+.rt-ctrl-bar input[type="date"]:focus{border-color:#dc2626}
+.rt-kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
+@media(max-width:900px){.rt-kpi-row{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.rt-kpi-row{grid-template-columns:repeat(2,1fr)}}
+.rt-kpi{background:#fff;border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);border:1px solid var(--border);border-top:3px solid #dc2626;position:relative;overflow:hidden}
+.rt-kpi-lbl{font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;font-weight:700;color:var(--sub);margin-bottom:4px}
+.rt-kpi-val{font-size:1.5rem;font-weight:800;color:var(--text);line-height:1}
+.rt-kpi-sub{font-size:.7rem;color:var(--sub);margin-top:5px}
+.rt-kpi-val.neg{color:#dc2626}.rt-kpi-val.pos{color:#16a34a}
+.rt-grid{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:800px){.rt-grid{grid-template-columns:1fr}}
+.rt-card{background:#fff;border-radius:14px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.rt-card.full{grid-column:1/-1}
+.rt-card-title{font-size:.88rem;font-weight:700;color:var(--text);margin-bottom:14px}
+.machine-card{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:1.5px solid;margin-bottom:8px}
+.machine-ok{background:#f0fdf4;border-color:#bbf7d0}
+.machine-down{background:#fef2f2;border-color:#fecaca}
+.machine-icon{font-size:1.4rem}
+.machine-name{font-weight:700;font-size:.88rem}
+.machine-ok .machine-name{color:#15803d}.machine-down .machine-name{color:#dc2626}
+.machine-meta{font-size:.72rem;color:var(--sub);margin-top:2px}
+.dt-tbl{width:100%;border-collapse:collapse;font-size:.78rem}
+.dt-tbl th{background:#f8fafc;font-weight:700;color:var(--sub);padding:7px 10px;text-align:left;border-bottom:2px solid var(--border)}
+.dt-tbl td{padding:7px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+.dt-tbl tr:hover td{background:#f8fafc}
+.badge-up{background:#fef2f2;color:#dc2626;padding:2px 8px;border-radius:6px;font-weight:700;font-size:.7rem}
+.badge-pl{background:#f0fdf4;color:#15803d;padding:2px 8px;border-radius:6px;font-weight:700;font-size:.7rem}
+/* Modal */
+.rm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.rm-overlay.open{display:flex}
+.rm-box{background:#fff;border-radius:18px;padding:28px 28px 20px;width:680px;max-width:95vw;max-height:92vh;overflow-y:auto;box-shadow:0 24px 64px rgba(0,0,0,.3)}
+.rm-box h2{font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:4px}
+.rm-box p{font-size:.82rem;color:var(--sub);margin-bottom:16px}
+.rm-tabs{display:flex;gap:3px;background:#f1f5f9;padding:3px;border-radius:10px;margin-bottom:18px}
+.rm-tab{flex:1;padding:6px 10px;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:.82rem;background:transparent;color:var(--sub);transition:all .18s;text-align:center}
+.rm-tab.active{background:#fff;color:var(--accent);box-shadow:0 1px 4px rgba(37,99,235,.2)}
+.rm-pane{display:none}.rm-pane.active{display:block}
+.rm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin-bottom:12px}
+.rm-grid.c3{grid-template-columns:repeat(3,1fr)}.rm-grid.c4{grid-template-columns:repeat(4,1fr)}
+.rm-fg label{display:block;font-size:.71rem;font-weight:700;color:var(--sub);margin-bottom:4px;text-transform:uppercase;letter-spacing:.05em}
+.rm-fg input,.rm-fg select{width:100%;padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:.84rem;color:var(--text);background:#fff;outline:none;transition:border-color .15s}
+.rm-fg input:focus,.rm-fg select:focus{border-color:var(--accent)}
+.rm-fg.span2{grid-column:span 2}
+.rm-slbl{font-size:.72rem;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.08em;margin:12px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.rm-msg{padding:8px 12px;border-radius:8px;font-size:.82rem;font-weight:600;margin-top:8px;display:none}
+.rm-msg.ok{background:#f0fdf4;color:#15803d;display:block;border:1px solid #bbf7d0}
+.rm-msg.err{background:#fef2f2;color:#dc2626;display:block;border:1px solid #fecaca}
+.rm-msg.loading{background:#eff6ff;color:#2563eb;display:block;border:1px solid #bfdbfe}
+.rm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.rm-save{padding:8px 22px;border-radius:9px;border:none;cursor:pointer;font-weight:700;font-size:.86rem;background:#dc2626;color:#fff;transition:background .15s}
+.rm-save:hover{background:#b91c1c}
+.rm-cancel{padding:8px 18px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;font-weight:600;font-size:.86rem;background:transparent;color:var(--sub);transition:all .15s}
+.rm-cancel:hover{background:#f1f5f9}
+.rm-setup{background:#fffbeb;border:1px solid #fcd34d;border-radius:10px;padding:12px 14px;font-size:.78rem;color:#92400e;line-height:1.7;margin-bottom:14px}
+.rm-setup b{color:#78350f}
+
 </style>
 </head>
 <body>
@@ -169,12 +236,16 @@ select:focus{outline:none;border-color:var(--accent)}
       <option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
     </select>
   </div>
+  <div class="view-toggle" style="margin-left:auto;margin-right:4px">
+    <button class="vt-btn v-daily active" id="vtDaily" onclick="setView('daily',this)">📊 รายวัน</button>
+    <button class="vt-btn v-rt" id="vtRt" onclick="setView('realtime',this)">🔴 Realtime Monitor</button>
+  </div>
   <div class="status-dot" id="statusDot"></div>
   <span id="statusText">กำลังโหลด…</span>
 </div>
 
 <!-- KPI ROW -->
-<div class="kpi-row">
+<div class="kpi-row daily-view" id="dailyKPI">
   <div class="kpi green">
     <div class="kpi-icon">&#127959;</div>
     <div class="kpi-label">BCM เดือนนี้</div>
@@ -208,7 +279,7 @@ select:focus{outline:none;border-color:var(--accent)}
 </div>
 
 <!-- CHARTS -->
-<div class="charts-area">
+<div class="charts-area daily-view" id="dailyCharts">
 
   <!-- BCM Cumulative — full width -->
   <div class="chart-card full">
@@ -275,6 +346,191 @@ select:focus{outline:none;border-color:var(--accent)}
     </div>
   </div>
 
+</div>
+
+
+
+<!-- ══════ REALTIME MONITOR SECTION ══════ -->
+<div id="rtWrap" class="rt-wrap">
+
+  <div class="rt-ctrl-bar">
+    <span style="font-size:.88rem;font-weight:800;color:#dc2626">🔴 Realtime Monitor</span>
+    <span style="font-size:.8rem;color:var(--sub)">ข้อมูลรายชั่วโมง — CCR Input</span>
+    <label style="margin-left:16px">วันที่:</label>
+    <input type="date" id="rtDate" onchange="renderRT()">
+    <span id="rtNote" style="font-size:.8rem;font-weight:600;color:#dc2626"></span>
+    <button onclick="loadRTData()" style="padding:5px 14px;border-radius:8px;border:1.5px solid #dc2626;background:#fef2f2;color:#dc2626;font-size:.8rem;font-weight:700;cursor:pointer">🔄 โหลดข้อมูล</button>
+    <button onclick="openRTModal()" style="padding:5px 14px;border-radius:8px;border:1.5px solid #2563eb;background:#eff6ff;color:#2563eb;font-size:.8rem;font-weight:700;cursor:pointer">📝 CCR กรอกข้อมูล</button>
+    <button onclick="openRTSettings()" style="padding:5px 14px;border-radius:8px;border:1.5px solid var(--border);background:#f8fafc;color:var(--sub);font-size:.8rem;font-weight:700;cursor:pointer">⚙️ ตั้งค่า Script</button>
+  </div>
+
+  <!-- KPI Row -->
+  <div class="rt-kpi-row" id="rtKPI">
+    <div class="rt-kpi"><div class="rt-kpi-lbl">BCM วันนี้ (สะสม)</div><div class="rt-kpi-val" id="rtK1">—</div><div class="rt-kpi-sub" id="rtK1s">ชั่วโมงที่บันทึก</div></div>
+    <div class="rt-kpi"><div class="rt-kpi-lbl">BCM ต่อชั่วโมง (เฉลี่ย)</div><div class="rt-kpi-val" id="rtK2">—</div><div class="rt-kpi-sub">BCM/hr วันนี้</div></div>
+    <div class="rt-kpi"><div class="rt-kpi-lbl">กระแสไฟล่าสุด (A)</div><div class="rt-kpi-val" id="rtK3">—</div><div class="rt-kpi-sub">Ampere ชั่วโมงล่าสุด</div></div>
+    <div class="rt-kpi"><div class="rt-kpi-lbl">Downtime วันนี้</div><div class="rt-kpi-val" id="rtK4">—</div><div class="rt-kpi-sub" id="rtK4s">เหตุการณ์</div></div>
+    <div class="rt-kpi"><div class="rt-kpi-lbl">Unplanned Downtime</div><div class="rt-kpi-val" id="rtK5">—</div><div class="rt-kpi-sub" id="rtK5s">Planned: 0 ครั้ง</div></div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="rt-grid">
+
+    <!-- Left: Hourly BCM Chart -->
+    <div class="rt-card">
+      <div class="rt-card-title" id="rtChartTitle">📊 BCM รายชั่วโมง</div>
+      <canvas id="rtHourlyChart" height="180"></canvas>
+    </div>
+
+    <!-- Right: Machine Status -->
+    <div class="rt-card">
+      <div class="rt-card-title">⚙️ สถานะเครื่องจักร</div>
+      <div id="rtMachines"></div>
+    </div>
+
+  </div>
+
+  <!-- Downtime Table -->
+  <div class="rt-card full">
+    <div class="rt-card-title" style="display:flex;align-items:center;justify-content:space-between">
+      <span>⏸ เหตุการณ์หยุดเครื่อง (Downtime)</span>
+      <span id="rtDTSum" style="font-size:.8rem;font-weight:700;color:#dc2626"></span>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="dt-tbl">
+        <thead><tr>
+          <th>วันที่</th><th>เวลาเริ่ม</th><th>เวลาสิ้นสุด</th><th>รวม (นาที)</th>
+          <th>เครื่องจักร</th><th>สาเหตุ / รายละเอียด</th><th>ประเภท</th>
+        </tr></thead>
+        <tbody id="rtDTBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div><!-- end rtWrap -->
+
+<!-- ══ REALTIME CCR ENTRY MODAL ══ -->
+<div class="rm-overlay" id="rtModal">
+  <div class="rm-box">
+    <h2>🔴 CCR กรอกข้อมูล Realtime</h2>
+    <p>บันทึกข้อมูลรายชั่วโมงหรือ Downtime แล้วกด <b>บันทึก</b> เพื่อส่งเข้า Google Sheet</p>
+    <div class="rm-tabs">
+      <button class="rm-tab active" onclick="setRMTab('hourly',this)">📊 ข้อมูลรายชั่วโมง</button>
+      <button class="rm-tab" onclick="setRMTab('downtime',this)">⏸ บันทึก Downtime</button>
+      <button class="rm-tab" onclick="setRMTab('daily',this)">📅 ข้อมูลรายวัน</button>
+    </div>
+
+    <!-- Hourly Pane -->
+    <div class="rm-pane active" id="rmPaneH">
+      <div class="rm-grid c4">
+        <div class="rm-fg"><label>Line *</label>
+          <select id="rmLineH"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
+        </div>
+        <div class="rm-fg"><label>วันที่ *</label><input id="rmDateH" type="date"></div>
+        <div class="rm-fg"><label>ชั่วโมง * (0–23)</label><input id="rmHourH" type="number" min="0" max="23" placeholder="0–23"></div>
+        <div class="rm-fg"></div>
+      </div>
+      <div class="rm-slbl">📊 ข้อมูลชั่วโมงนี้</div>
+      <div class="rm-grid c3">
+        <div class="rm-fg"><label>BCM (ชั่วโมงนี้)</label><input id="rmBCMH" type="number" placeholder="เช่น 3,500"></div>
+        <div class="rm-fg"><label>กระแสไฟฟ้า (A)</label><input id="rmCurH" type="number" step="0.1" placeholder="เช่น 245.5"></div>
+        <div class="rm-fg"><label>หมายเหตุ</label><input id="rmNoteH" type="text" placeholder="ไม่บังคับ"></div>
+      </div>
+      <div class="rm-msg" id="rmMsgH"></div>
+    </div>
+
+    <!-- Downtime Pane -->
+    <div class="rm-pane" id="rmPaneDT">
+      <div class="rm-grid c4">
+        <div class="rm-fg"><label>Line *</label>
+          <select id="rmLineDT"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
+        </div>
+        <div class="rm-fg"><label>วันที่ *</label><input id="rmDateDT" type="date"></div>
+        <div class="rm-fg"><label>เวลาเริ่ม *</label><input id="rmStartDT" type="time"></div>
+        <div class="rm-fg"><label>เวลาสิ้นสุด</label><input id="rmEndDT" type="time"></div>
+      </div>
+      <div class="rm-slbl">⚙️ รายละเอียดเหตุการณ์</div>
+      <div class="rm-grid">
+        <div class="rm-fg"><label>เครื่องจักร *</label>
+          <select id="rmMachineDT">
+            <option value="BWE">BWE</option><option value="Crusher">Crusher</option>
+            <option value="Conveyor">Conveyor</option><option value="Spreader">Spreader</option>
+            <option value="อื่นๆ">อื่นๆ</option>
+          </select>
+        </div>
+        <div class="rm-fg"><label>ประเภท *</label>
+          <select id="rmTypeDT">
+            <option value="unplanned">Unplanned (ไม่ได้วางแผน)</option>
+            <option value="planned">Planned (วางแผนไว้)</option>
+          </select>
+        </div>
+        <div class="rm-fg span2"><label>สาเหตุ / รายละเอียด *</label>
+          <input id="rmCauseDT" type="text" placeholder="เช่น Belt รั่ว, Crusher trip, ซ่อมปกติ…">
+        </div>
+      </div>
+      <div class="rm-msg" id="rmMsgDT"></div>
+    </div>
+
+    <!-- Daily Entry Pane -->
+    <div class="rm-pane" id="rmPaneD">
+      <div class="rm-grid c4">
+        <div class="rm-fg"><label>Line *</label>
+          <select id="rmLineD"><option value="WA">Line WA</option><option value="WB">Line WB</option><option value="WN">Line WN</option></select>
+        </div>
+        <div class="rm-fg"><label>ปี (ค.ศ.) *</label><input id="rmYearD" type="number" min="2020" max="2035" placeholder="2025"></div>
+        <div class="rm-fg"><label>เดือน *</label>
+          <select id="rmMonthD">
+            <option value="1">1 — มกราคม</option><option value="2">2 — กุมภาพันธ์</option><option value="3">3 — มีนาคม</option>
+            <option value="4">4 — เมษายน</option><option value="5">5 — พฤษภาคม</option><option value="6">6 — มิถุนายน</option>
+            <option value="7">7 — กรกฎาคม</option><option value="8">8 — สิงหาคม</option><option value="9">9 — กันยายน</option>
+            <option value="10">10 — ตุลาคม</option><option value="11">11 — พฤศจิกายน</option><option value="12">12 — ธันวาคม</option>
+          </select>
+        </div>
+        <div class="rm-fg"><label>วันที่ *</label><input id="rmDayD" type="number" min="1" max="31" placeholder="1–31"></div>
+      </div>
+      <div class="rm-slbl">📊 ข้อมูลประจำวัน</div>
+      <div class="rm-grid c4">
+        <div class="rm-fg"><label>Activity *</label>
+          <select id="rmActD">
+            <option value="RUN">RUN</option><option value="PM">PM</option><option value="DPM">DPM</option>
+            <option value="SHIFT">SHIFT</option><option value="STAND BY">STAND BY</option>
+          </select>
+        </div>
+        <div class="rm-fg"><label>BCM (วันนี้)</label><input id="rmBCMD" type="number" placeholder="เช่น 75,000"></div>
+        <div class="rm-fg"><label>kWh (วันนี้)</label><input id="rmKWHD" type="number" placeholder="เช่น 590,000"></div>
+        <div class="rm-fg"><label>Working Hours</label><input id="rmWHD" type="number" step="0.1" placeholder="เช่น 16.5"></div>
+      </div>
+      <div class="rm-msg" id="rmMsgD"></div>
+    </div>
+
+    <div class="rm-actions">
+      <button class="rm-cancel" onclick="closeRTModal()">ยกเลิก</button>
+      <button class="rm-save" onclick="submitRM()">💾 บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCRIPT SETTINGS MODAL ══ -->
+<div class="rm-overlay" id="rtSettingsModal">
+  <div class="rm-box" style="width:500px">
+    <h2>⚙️ ตั้งค่า Google Apps Script</h2>
+    <p>วาง URL ของ Google Apps Script Web App เพื่อให้ CCR ส่งข้อมูลเข้า Google Sheet ได้ตรง</p>
+    <div class="rm-setup">
+      <b>วิธีตั้งค่า (ทำครั้งเดียว):</b><br>
+      1. เปิด Google Apps Script → Deploy → New deployment → Web App<br>
+      2. ตั้ง Execute as: <b>Me</b> · Access: <b>Anyone</b><br>
+      3. Copy URL แล้ววางในช่องด้านล่าง<br>
+      4. กด <b>บันทึก</b>
+    </div>
+    <div class="rm-fg" style="margin-bottom:12px">
+      <label>Google Apps Script URL</label>
+      <input id="rtScriptUrl" type="url" placeholder="https://script.google.com/macros/s/AKfy.../exec">
+    </div>
+    <div class="rm-actions">
+      <button class="rm-cancel" onclick="document.getElementById('rtSettingsModal').classList.remove('open')">ยกเลิก</button>
+      <button class="rm-save" onclick="saveRTSettings()">💾 บันทึก</button>
+    </div>
+  </div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -554,16 +810,325 @@ function renderCal(rows,yr,mo){
         tip.innerHTML='<b>'+d+' '+TM[mo]+'</b> ('+r.activity+')<br>BCM: '+r.bcm.toLocaleString('th-TH',{maximumFractionDigits:0})+' BCM<br>WH: '+r.wh+' hr<br>สะสม: '+r.bcm_cum.toLocaleString('th-TH',{maximumFractionDigits:0})+' BCM';
         tip.style.display='block';tip.style.left=(ev.clientX+14)+'px';tip.style.top=(ev.clientY-12)+'px';
       });
+
       e.addEventListener('mousemove',ev=>{tip.style.left=(ev.clientX+14)+'px';tip.style.top=(ev.clientY-12)+'px';});
-      e.addEventListener('mouseleave',()=>tip.style.display='none');
+      e.addEventListener('mouseleave',()=>{tip.style.display='none';});
     }
     g.appendChild(e);
   }
 }
 
+// ── HELPERS ───────────────────────────────────────────────────────────
+function N(n,dec=0){return n==null?'-':n.toLocaleString('th-TH',{maximumFractionDigits:dec,minimumFractionDigits:dec});}
 function destroy(id){if(charts[id]){charts[id].destroy();delete charts[id];}}
-function clearAll(){destroy('cumulChart');destroy('bcmChart');destroy('actChart');destroy('whChart');document.getElementById('calGrid').innerHTML='';}
+function clearAll(){
+  ['cumulChart','bcmChart','actChart','whChart'].forEach(id=>destroy(id));
+  ['kBcm','kBcmSub','kWh','kWhSub','kRun','kRunSub','kProd','kForecast'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='—';});
+  const g=document.getElementById('calGrid');if(g)g.innerHTML='';
+  const nb=document.getElementById('predNote');if(nb)nb.style.display='none';
+}
 
+// ── VIEW TOGGLE (Daily ↔ Realtime) ────────────────────────────────────
+let currentView = 'daily';
+function setView(v, btn){
+  currentView = v;
+  document.querySelectorAll('.vt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const isDailyView = (v === 'daily');
+  document.querySelectorAll('.daily-view').forEach(el=>el.style.display = isDailyView ? '' : 'none');
+  const rtWrap = document.getElementById('rtWrap');
+  if(isDailyView){
+    rtWrap.classList.remove('show');
+    // Update year/month selectors visibility
+    document.querySelectorAll('.ctrl-group').forEach(el=>el.style.display='');
+    document.getElementById('statusDot').style.display='';
+    document.getElementById('statusText').style.display='';
+  } else {
+    rtWrap.classList.add('show');
+    document.querySelectorAll('.ctrl-group').forEach(el=>el.style.display='none');
+    document.getElementById('statusDot').style.display='none';
+    document.getElementById('statusText').style.display='none';
+    initRTDate();
+    renderRT();
+  }
+}
+
+// ── REALTIME DATA STORE ───────────────────────────────────────────────
+const HOURLY_DATA   = {WA:[],WB:[],WN:[]};
+const DOWNTIME_DATA = {WA:[],WB:[],WN:[]};
+let rtChart = null, currentRMTab = 'hourly';
+
+function initRTDate(){
+  const d = new Date();
+  const iso = d.toISOString().split('T')[0];
+  document.getElementById('rtDate').value = iso;
+  document.getElementById('rmDateH').value = iso;
+  document.getElementById('rmDateDT').value = iso;
+  document.getElementById('rmHourH').value = d.getHours();
+}
+
+function N_fmt(n){return N(n,0);}
+
+// ── RENDER REALTIME VIEW ──────────────────────────────────────────────
+function renderRT(){
+  const dateStr = document.getElementById('rtDate').value;
+  if(!dateStr) return;
+  const [yr,mo,dy] = dateStr.split('-').map(Number);
+  const ln = line;
+
+  const hourlyDay = (HOURLY_DATA[ln]||[]).filter(r=>r.y===yr&&r.m===mo&&r.d===dy).sort((a,b)=>a.h-b.h);
+  const dtDay     = (DOWNTIME_DATA[ln]||[]).filter(r=>r.y===yr&&r.m===mo&&r.d===dy).sort((a,b)=>a.start.localeCompare(b.start));
+
+  document.getElementById('rtChartTitle').textContent = `📊 BCM รายชั่วโมง — Line ${ln} | ${dy}/${mo}/${yr}`;
+
+  // KPI
+  const totalBCM  = hourlyDay.reduce((s,r)=>s+r.bcm,0);
+  const lastCur   = hourlyDay.length>0?hourlyDay[hourlyDay.length-1].current:0;
+  const totalDT   = dtDay.reduce((s,r)=>s+r.dur,0);
+  const avgRate   = hourlyDay.length>0?Math.round(totalBCM/hourlyDay.length):0;
+  const unplanned = dtDay.filter(r=>r.typedt==='unplanned').length;
+  const planned   = dtDay.filter(r=>r.typedt==='planned').length;
+
+  const setKPI=(id,val,sub,cls)=>{
+    const e=document.getElementById(id);if(e)e.textContent=val;
+    if(cls&&e){e.className='rt-kpi-val '+(cls||'');}
+    const se=document.getElementById(id+'s');if(se&&sub!==undefined)se.textContent=sub;
+  };
+  setKPI('rtK1', N_fmt(Math.round(totalBCM)), `${hourlyDay.length} ชั่วโมงที่บันทึก`);
+  setKPI('rtK2', N_fmt(avgRate), 'BCM/hr วันนี้');
+  setKPI('rtK3', lastCur>0?lastCur.toFixed(1):'—', 'Ampere ชั่วโมงล่าสุด');
+  const dtE=document.getElementById('rtK4');if(dtE){dtE.textContent=totalDT>0?`${Math.floor(totalDT/60)}ชม. ${totalDT%60}นาที`:'0 นาที';dtE.className='rt-kpi-val '+(totalDT>60?'neg':totalDT>0?'':'pos');}
+  const dtS=document.getElementById('rtK4s');if(dtS)dtS.textContent=`${dtDay.length} เหตุการณ์`;
+  const unE=document.getElementById('rtK5');if(unE){unE.textContent=unplanned;unE.className='rt-kpi-val '+(unplanned>0?'neg':'pos');}
+  const unS=document.getElementById('rtK5s');if(unS)unS.textContent=`Planned: ${planned} ครั้ง`;
+
+  // Hourly Chart
+  const hrs = Array.from({length:24},(_,i)=>`${i}:00`);
+  const bcmH = Array(24).fill(null);
+  hourlyDay.forEach(r=>{bcmH[r.h]=r.bcm;});
+  if(rtChart) rtChart.destroy();
+  rtChart = new Chart(document.getElementById('rtHourlyChart'),{
+    type:'bar',
+    data:{labels:hrs, datasets:[{
+      label:`BCM/ชม. — Line ${ln}`,
+      data:bcmH,
+      backgroundColor: bcmH.map(v=>v===null?'rgba(203,213,225,.4)':'rgba(220,38,38,.7)'),
+      borderColor: bcmH.map(v=>v===null?'#cbd5e1':'#b91c1c'),
+      borderWidth:1.5, borderRadius:4
+    }]},
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>ctx.parsed.y!=null?` BCM: ${N_fmt(ctx.parsed.y)}`:' ยังไม่มีข้อมูล'}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10},maxRotation:45}},
+        y:{grid:{color:'rgba(0,0,0,.05)'},ticks:{font:{size:10},callback:v=>N_fmt(v)},
+          title:{display:true,text:'BCM',color:'#64748b',font:{size:10}}}
+      }
+    }
+  });
+
+  // Machine Status
+  const activeDT = new Set(dtDay.filter(r=>!r.end||r.end==='').map(r=>r.machine));
+  const machines = ['BWE','Crusher','Conveyor','Spreader'];
+  document.getElementById('rtMachines').innerHTML = machines.map(m=>{
+    const down = activeDT.has(m);
+    const cnt = dtDay.filter(r=>r.machine===m).length;
+    return `<div class="machine-card ${down?'machine-down':'machine-ok'}">
+      <span class="machine-icon">${down?'🔴':'🟢'}</span>
+      <div>
+        <div class="machine-name">${m}</div>
+        <div class="machine-meta">${down?'⚠️ Downtime ยังดำเนินอยู่':'ทำงานปกติ'} · DT วันนี้: ${cnt} ครั้ง</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Downtime Table
+  const dtTotal = dtDay.reduce((s,r)=>s+r.dur,0);
+  const sumEl = document.getElementById('rtDTSum');
+  if(sumEl) sumEl.textContent = dtDay.length>0?`รวม ${dtTotal} นาที (${Math.floor(dtTotal/60)}ชม. ${dtTotal%60}นาที)`:'';
+  document.getElementById('rtDTBody').innerHTML = dtDay.length===0
+    ? '<tr><td colspan="7" style="text-align:center;color:#16a34a;padding:20px;font-weight:600">✅ ไม่มีเหตุการณ์ Downtime ในวันนี้</td></tr>'
+    : dtDay.map(r=>{
+        const badge = r.typedt==='unplanned'?'<span class="badge-up">🔴 Unplanned</span>':'<span class="badge-pl">🟢 Planned</span>';
+        return `<tr>
+          <td>${r.d}/${r.m}/${r.y}</td><td>${r.start}</td><td>${r.end||'—'}</td>
+          <td>${r.dur>0?r.dur:'—'}</td><td>${r.machine}</td>
+          <td>${r.cause}</td><td>${badge}</td>
+        </tr>`;
+      }).join('');
+}
+
+async function loadRTData(){
+  const note = document.getElementById('rtNote');
+  note.textContent = '⏳ กำลังโหลด…';
+  let ok=[], fail=[];
+  const tasks = [];
+  ['WA','WB','WN'].forEach(ln=>{
+    tasks.push((async()=>{
+      const u = localStorage.getItem('rt_hourly_'+ln);
+      if(!u) return;
+      try{const r=await fetch(u);HOURLY_DATA[ln]=parseHourlyCSV(await r.text());ok.push(ln+'_h');}
+      catch(e){fail.push(ln+'_h');}
+    })());
+    tasks.push((async()=>{
+      const u = localStorage.getItem('rt_downtime_'+ln);
+      if(!u) return;
+      try{const r=await fetch(u);DOWNTIME_DATA[ln]=parseDTCSV(await r.text());ok.push(ln+'_dt');}
+      catch(e){fail.push(ln+'_dt');}
+    })());
+  });
+  await Promise.all(tasks);
+  if(ok.length) note.textContent=`✅ โหลดสำเร็จ: ${ok.join(', ')}`;
+  else note.textContent='ℹ️ ยังไม่มีข้อมูลใน Sheet — กด 📝 CCR กรอกข้อมูล เพื่อเริ่มต้น';
+  renderRT();
+}
+
+function parseHourlyCSV(text){
+  const lines=text.trim().split(/\r?\n/);if(lines.length<2)return[];
+  const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
+  return lines.slice(1).map(line=>{
+    const vals=[];let cur='',inQ=false;
+    for(const ch of line){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=ch;}
+    vals.push(cur.trim());
+    const obj={};hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
+    return{y:+obj['year']||0,m:+obj['month']||0,d:+obj['day']||0,
+      h:+obj['hour']||0,bcm:+obj['bcm']||0,current:+obj['current_a']||0,notes:obj['notes']||''};
+  }).filter(r=>r.y>2000&&r.m>=1&&r.d>=1);
+}
+
+function parseDTCSV(text){
+  const lines=text.trim().split(/\r?\n/);if(lines.length<2)return[];
+  const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
+  return lines.slice(1).map(line=>{
+    const vals=[];let cur='',inQ=false;
+    for(const ch of line){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}else cur+=ch;}
+    vals.push(cur.trim());
+    const obj={};hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
+    return{y:+obj['year']||0,m:+obj['month']||0,d:+obj['day']||0,
+      start:obj['start_time']||'',end:obj['end_time']||'',machine:obj['machine']||'',
+      cause:obj['cause']||'',typedt:obj['type']||'',dur:+obj['duration_min']||0};
+  }).filter(r=>r.y>2000);
+}
+
+// ── MODAL ──────────────────────────────────────────────────────────────
+function openRTModal(){
+  const ln=line==='ALL'?'WA':line;
+  const dateStr=document.getElementById('rtDate').value||new Date().toISOString().split('T')[0];
+  ['rmLineH','rmLineDT','rmLineD'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=ln;});
+  ['rmDateH','rmDateDT'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=dateStr;});
+  const h=document.getElementById('rmHourH');if(h)h.value=new Date().getHours();
+  const yr=document.getElementById('rmYearD');if(yr)yr.value=new Date().getFullYear();
+  const mo=document.getElementById('rmMonthD');if(mo)mo.value=new Date().getMonth()+1;
+  document.getElementById('rtModal').classList.add('open');
+}
+function closeRTModal(){document.getElementById('rtModal').classList.remove('open');}
+
+function setRMTab(tab,btn){
+  currentRMTab=tab;
+  document.querySelectorAll('.rm-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rmPaneH').classList.toggle('active',tab==='hourly');
+  document.getElementById('rmPaneDT').classList.toggle('active',tab==='downtime');
+  document.getElementById('rmPaneD').classList.toggle('active',tab==='daily');
+}
+
+async function submitRM(){
+  const scriptUrl=localStorage.getItem('rtScriptUrl');
+  if(!scriptUrl){alert('⚠️ ยังไม่ได้ตั้งค่า Script URL — กด ⚙️ ตั้งค่า Script ก่อน');return;}
+  if(currentRMTab==='hourly') await submitHourly(scriptUrl);
+  else if(currentRMTab==='downtime') await submitDowntime(scriptUrl);
+  else await submitDailyEntry(scriptUrl);
+}
+
+async function submitHourly(scriptUrl){
+  const msg=document.getElementById('rmMsgH');
+  const dateVal=document.getElementById('rmDateH').value;
+  if(!dateVal){msg.className='rm-msg err';msg.textContent='⚠️ กรุณาเลือกวันที่';return;}
+  const [yr,mo,dy]=dateVal.split('-').map(Number);
+  const data={type:'hourly',line:document.getElementById('rmLineH').value,
+    year:yr,month:mo,day:dy,hour:+document.getElementById('rmHourH').value||0,
+    bcm:+document.getElementById('rmBCMH').value||0,
+    current_a:+document.getElementById('rmCurH').value||0,
+    notes:document.getElementById('rmNoteH').value||''};
+  if(!yr||data.hour<0||data.hour>23){msg.className='rm-msg err';msg.textContent='⚠️ กรุณากรอกข้อมูลให้ครบ';return;}
+  msg.className='rm-msg loading';msg.textContent='⏳ กำลังบันทึก…';
+  try{
+    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
+    msg.className='rm-msg ok';msg.textContent=`✅ บันทึก BCM ชั่วโมง ${data.hour}:00 Line ${data.line} สำเร็จ!`;
+    const l=data.line;
+    HOURLY_DATA[l]=HOURLY_DATA[l].filter(r=>!(r.y===yr&&r.m===mo&&r.d===dy&&r.h===data.hour));
+    if(data.bcm||data.current_a) HOURLY_DATA[l].push({y:yr,m:mo,d:dy,h:data.hour,bcm:data.bcm,current:data.current_a,notes:data.notes});
+    document.getElementById('rmBCMH').value='';document.getElementById('rmCurH').value='';document.getElementById('rmNoteH').value='';
+    if(currentView==='realtime') renderRT();
+  }catch(e){msg.className='rm-msg err';msg.textContent='❌ Error: '+e.message;}
+}
+
+async function submitDowntime(scriptUrl){
+  const msg=document.getElementById('rmMsgDT');
+  const dateVal=document.getElementById('rmDateDT').value;
+  if(!dateVal){msg.className='rm-msg err';msg.textContent='⚠️ กรุณาเลือกวันที่';return;}
+  const [yr,mo,dy]=dateVal.split('-').map(Number);
+  const startT=document.getElementById('rmStartDT').value;
+  const endT=document.getElementById('rmEndDT').value;
+  const cause=document.getElementById('rmCauseDT').value.trim();
+  if(!startT||!cause){msg.className='rm-msg err';msg.textContent='⚠️ กรุณากรอก เวลาเริ่ม และ สาเหตุ';return;}
+  let dur=0;
+  if(startT&&endT){const[sh,sm]=startT.split(':').map(Number);const[eh,em]=endT.split(':').map(Number);dur=(eh*60+em)-(sh*60+sm);if(dur<0)dur+=1440;}
+  const data={type:'downtime',line:document.getElementById('rmLineDT').value,
+    year:yr,month:mo,day:dy,start_time:startT,end_time:endT,
+    machine:document.getElementById('rmMachineDT').value,cause,
+    type_dt:document.getElementById('rmTypeDT').value,duration_min:dur};
+  msg.className='rm-msg loading';msg.textContent='⏳ กำลังบันทึก…';
+  try{
+    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
+    msg.className='rm-msg ok';msg.textContent=`✅ บันทึก Downtime ${data.machine} ${startT} Line ${data.line} สำเร็จ!`;
+    const l=data.line;
+    DOWNTIME_DATA[l].push({y:yr,m:mo,d:dy,start:startT,end:endT,machine:data.machine,cause,typedt:data.type_dt,dur});
+    document.getElementById('rmStartDT').value='';document.getElementById('rmEndDT').value='';document.getElementById('rmCauseDT').value='';
+    if(currentView==='realtime') renderRT();
+  }catch(e){msg.className='rm-msg err';msg.textContent='❌ Error: '+e.message;}
+}
+
+async function submitDailyEntry(scriptUrl){
+  const msg=document.getElementById('rmMsgD');
+  const yr=+document.getElementById('rmYearD').value;
+  const mo=+document.getElementById('rmMonthD').value;
+  const dy=+document.getElementById('rmDayD').value;
+  if(!yr||!mo||!dy){msg.className='rm-msg err';msg.textContent='⚠️ กรุณากรอก ปี เดือน วันที่';return;}
+  const data={type:'daily',line:document.getElementById('rmLineD').value,
+    year:yr,month:mo,day:dy,activity:document.getElementById('rmActD').value,
+    bcm:+document.getElementById('rmBCMD').value||0,kwh:+document.getElementById('rmKWHD').value||0,
+    wh:+document.getElementById('rmWHD').value||0};
+  msg.className='rm-msg loading';msg.textContent='⏳ กำลังบันทึก…';
+  try{
+    await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
+    msg.className='rm-msg ok';msg.textContent=`✅ บันทึกข้อมูลวันที่ ${dy}/${mo}/${yr} Line ${data.line} สำเร็จ!`;
+    // Refresh daily data cache
+    allData[data.line]=null;
+  }catch(e){msg.className='rm-msg err';msg.textContent='❌ Error: '+e.message;}
+}
+
+function openRTSettings(){
+  const saved=localStorage.getItem('rtScriptUrl')||'';
+  document.getElementById('rtScriptUrl').value=saved;
+  document.getElementById('rtSettingsModal').classList.add('open');
+}
+function saveRTSettings(){
+  const url=document.getElementById('rtScriptUrl').value.trim();
+  if(url) localStorage.setItem('rtScriptUrl',url);
+  document.getElementById('rtSettingsModal').classList.remove('open');
+  alert('✅ บันทึก Script URL เรียบร้อย');
+}
+
+// Close modal on overlay click
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('rm-overlay')) e.target.classList.remove('open');
+});
+
+// ── INIT ──────────────────────────────────────────────────────────────
 initYearSelect();
 loadAndRender();
 </script>
