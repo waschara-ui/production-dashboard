@@ -900,20 +900,36 @@ function saveAndLoad(){
   loadDailyData();
 }
 
-/* ════════════ CSV PARSER ════════════ */
+/* ════════════ CSV PARSER (RFC 4180) ════════════ */
 function parseCSV(text){
-  const lines=text.trim().split(/\r?\n/);
-  if(lines.length<2) return [];
-  const hdr=lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
-  return lines.slice(1).map(line=>{
-    const vals=[]; let cur='', inQ=false;
-    for(const ch of line){
-      if(ch==='"'){inQ=!inQ;}
-      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
-      else cur+=ch;
+  // Full RFC 4180 parser — handles multi-line quoted fields
+  const records=[]; let i=0, field='', row=[], inQ=false;
+  while(i<=text.length){
+    const ch=text[i];
+    if(i===text.length||(!inQ&&(ch==='\n'||ch==='\r'))){
+      row.push(field); records.push(row); row=[]; field='';
+      if(ch==='\r'&&text[i+1]==='\n') i++;
+      i++; continue;
     }
-    vals.push(cur.trim());
-    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
+    if(inQ){
+      if(ch==='"'&&text[i+1]==='"'){field+='"';i+=2;}
+      else if(ch==='"'){inQ=false;i++;}
+      else{field+=ch;i++;}
+    } else {
+      if(ch==='"'){inQ=true;i++;}
+      else if(ch===','){row.push(field);field='';i++;}
+      else{field+=ch;i++;}
+    }
+  }
+  if(records.length<2) return [];
+  // Extract short key from multi-line header cells (last word of last line)
+  const hdr=records[0].map(h=>{
+    const lines=h.trim().toLowerCase().split('\n');
+    const last=lines[lines.length-1].trim();
+    return last.split(/\s+/).pop()||last;
+  });
+  return records.slice(1).map(vals=>{
+    const obj={}; hdr.forEach((h,j)=>obj[h]=(vals[j]||'').trim().replace(/,/g,''));
     return {
       y:parseInt(obj['year']||obj['y'])||0,
       m:parseInt(obj['month']||obj['m'])||0,
@@ -1064,18 +1080,32 @@ async function submitDailyEntry(scriptUrl){
 
 /* ════════════ DAILY TABLE ════════════ */
 function parseDailyCSV(text){
-  const lines = text.trim().split(/\r?\n/);
-  if(lines.length<2) return [];
-  const hdr = lines[0].split(',').map(h=>h.replace(/^"|"$/g,'').trim().toLowerCase());
-  return lines.slice(1).map(line=>{
-    const vals=[]; let cur='', inQ=false;
-    for(const ch of line){
-      if(ch==='"'){inQ=!inQ;}
-      else if(ch===','&&!inQ){vals.push(cur.trim());cur='';}
-      else cur+=ch;
+  // RFC 4180 parser reuse
+  const records=[]; let i=0, field='', row=[], inQ=false;
+  while(i<=text.length){
+    const ch=text[i];
+    if(i===text.length||(!inQ&&(ch==='\n'||ch==='\r'))){
+      row.push(field); records.push(row); row=[]; field='';
+      if(ch==='\r'&&text[i+1]==='\n') i++;
+      i++; continue;
     }
-    vals.push(cur.trim());
-    const obj={}; hdr.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/,/g,''));
+    if(inQ){
+      if(ch==='"'&&text[i+1]==='"'){field+='"';i+=2;}
+      else if(ch==='"'){inQ=false;i++;}
+      else{field+=ch;i++;}
+    } else {
+      if(ch==='"'){inQ=true;i++;}
+      else if(ch===','){row.push(field);field='';i++;}
+      else{field+=ch;i++;}
+    }
+  }
+  if(records.length<2) return [];
+  const hdr=records[0].map(h=>{
+    const ls=h.trim().toLowerCase().split('\n');
+    return ls[ls.length-1].trim().split(/\s+/).pop()||ls[ls.length-1].trim();
+  });
+  return records.slice(1).map(vals=>{
+    const obj={}; hdr.forEach((h,j)=>obj[h]=(vals[j]||'').trim().replace(/,/g,''));
     return {
       y:parseInt(obj['year']||obj['y'])||0, m:parseInt(obj['month']||obj['m'])||0,
       d:parseInt(obj['day']||obj['d'])||0, bcm:parseFloat(obj['bcm'])||0,
