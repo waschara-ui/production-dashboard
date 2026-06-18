@@ -301,50 +301,22 @@ tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
 <div class="modal-overlay" id="settingsModal">
   <div class="modal">
     <h2>🔗 เชื่อมต่อ Google Sheet</h2>
-    <p>วางลิงก์ CSV ของแต่ละ Sheet ด้านล่าง แล้วกด <b>บันทึก &amp; โหลด</b><br>
-    ข้อมูลใหม่จาก Sheet จะแทนที่ข้อมูลเดิมใน Dashboard ทันที</p>
+    <p>วาง URL ของ Google Sheet แล้วกด <b>💾 บันทึก &amp; โหลดข้อมูล</b><br>
+    Dashboard จะดึงข้อมูลจาก Sheet WA, WB, WN และ Sheet รายวันโดยอัตโนมัติ</p>
 
     <div class="step-box">
-      <b>วิธีเปิดลิงก์ CSV จาก Google Sheet:</b><br>
-      1. เปิด Google Sheet → เมนู <b>File → Share → Publish to web</b><br>
-      2. เลือก Sheet ที่ต้องการ (เช่น "WA") → เลือกรูปแบบ <b>Comma-separated values (.csv)</b><br>
-      3. กด <b>Publish</b> → Copy ลิงก์ที่ได้ → วางในช่องด้านล่าง<br>
-      4. ทำซ้ำสำหรับ Sheet WB และ WN
+      <b>วิธีตั้งค่า (ทำครั้งเดียว):</b><br>
+      1. Copy URL ของ Google Sheet มาวางในช่องด้านล่าง<br>
+      2. เปิด Google Sheet → กดปุ่ม <b>Share</b> (มุมบนขวา)<br>
+      3. เปลี่ยนเป็น <b>Anyone with the link</b> → <b>Viewer</b> → กด Done<br>
+      4. กด <b>💾 บันทึก &amp; โหลดข้อมูล</b>
     </div>
 
     <div class="modal-line">
-      <span class="modal-line-badge">WA</span>
+      <span class="modal-line-badge">📊</span>
       <div style="flex:1">
-        <input id="urlWA" type="url" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&output=csv" />
-      </div>
-    </div>
-    <div class="modal-line">
-      <span class="modal-line-badge">WB</span>
-      <div style="flex:1">
-        <input id="urlWB" type="url" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&output=csv" />
-      </div>
-    </div>
-    <div class="modal-line">
-      <span class="modal-line-badge">WN</span>
-      <div style="flex:1">
-        <input id="urlWN" type="url" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&output=csv" />
-      </div>
-    </div>
-
-    <div style="margin-top:18px;padding-top:14px;border-top:2px solid #f0d8a0;">
-      <b style="font-size:12px;color:#1a4a7a;">📅 ข้อมูลรายวัน (Daily Data Sheets)</b>
-      <p style="font-size:11px;color:#a07030;margin:6px 0 8px;line-height:1.6;">เพิ่ม Sheet ชื่อ <b>WA_daily</b>, <b>WB_daily</b>, <b>WN_daily</b> ในไฟล์ Google Sheet เดิม<br>คอลัมน์: <code>year, month, day, bcm, kwh, wh</code> → Publish to web แบบ CSV แล้ววางลิงก์ด้านล่าง</p>
-      <div class="modal-line">
-        <span class="modal-line-badge" style="background:#1a4a7a;">WA Daily</span>
-        <div style="flex:1"><input id="urlWAdaily" type="url" placeholder="CSV URL ของ sheet WA_daily" /></div>
-      </div>
-      <div class="modal-line">
-        <span class="modal-line-badge" style="background:#1a4a7a;">WB Daily</span>
-        <div style="flex:1"><input id="urlWBdaily" type="url" placeholder="CSV URL ของ sheet WB_daily" /></div>
-      </div>
-      <div class="modal-line">
-        <span class="modal-line-badge" style="background:#1a4a7a;">WN Daily</span>
-        <div style="flex:1"><input id="urlWNdaily" type="url" placeholder="CSV URL ของ sheet WN_daily" /></div>
+        <div style="font-size:11px;color:#888;margin-bottom:4px;">Google Sheet URL</div>
+        <input id="sheetIdInput" type="text" placeholder="https://docs.google.com/spreadsheets/d/1B5P-2Ep..." style="width:100%;box-sizing:border-box;" />
       </div>
     </div>
 
@@ -899,32 +871,33 @@ function renderElecTable(d){
 }
 
 /* ════════════ SETTINGS ════════════ */
+function extractSheetId(input){
+  const m=input.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+  return m?m[1]:input.trim();
+}
 function openSettings(){
-  document.getElementById('urlWA').value=localStorage.getItem('sheetUrl_WA')||'';
-  document.getElementById('urlWB').value=localStorage.getItem('sheetUrl_WB')||'';
-  document.getElementById('urlWN').value=localStorage.getItem('sheetUrl_WN')||'';
-  document.getElementById('urlWAdaily').value=localStorage.getItem('sheetUrl_WA_daily')||'';
-  document.getElementById('urlWBdaily').value=localStorage.getItem('sheetUrl_WB_daily')||'';
-  document.getElementById('urlWNdaily').value=localStorage.getItem('sheetUrl_WN_daily')||'';
+  document.getElementById('sheetIdInput').value=localStorage.getItem('sheetId')||'';
   document.getElementById('urlScript').value=localStorage.getItem('scriptUrl')||'';
   document.getElementById('settingsModal').classList.add('open');
 }
 function closeSettings(){ document.getElementById('settingsModal').classList.remove('open'); }
 
 function saveAndLoad(){
-  ['WA','WB','WN'].forEach(l=>{
-    const url=document.getElementById('url'+l).value.trim();
-    if(url) localStorage.setItem('sheetUrl_'+l,url);
-    const urlD=document.getElementById('url'+l+'daily').value.trim();
-    if(urlD) localStorage.setItem('sheetUrl_'+l+'_daily',urlD);
-  });
+  const raw=document.getElementById('sheetIdInput').value.trim();
+  const sid=extractSheetId(raw);
+  if(sid){
+    localStorage.setItem('sheetId',sid);
+    const base=`https://docs.google.com/spreadsheets/d/${sid}/gviz/tq?tqx=out:csv&sheet=`;
+    ['WA','WB','WN'].forEach(l=>{
+      localStorage.setItem('sheetUrl_'+l,base+l);
+      localStorage.setItem('sheetUrl_'+l+'_daily',base+l+'_daily');
+    });
+  }
   const sc=document.getElementById('urlScript').value.trim();
   if(sc) localStorage.setItem('scriptUrl',sc);
   closeSettings();
   loadFromSheets();
-  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l+'_daily'))){
-    loadDailyData();
-  }
+  loadDailyData();
 }
 
 /* ════════════ CSV PARSER ════════════ */
