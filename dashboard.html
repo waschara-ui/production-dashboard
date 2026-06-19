@@ -1169,5 +1169,18 @@ function renderDailySection(){
   tbody.innerHTML = rows.join('');
 }
 
-/* ════════════ REALTIME DATA ════════════ */
-/* ── auto-l
+
+/* ── auto-load on open if URLs already saved ── */
+window.addEventListener('load', ()=>{
+  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l))){
+    loadFromSheets();
+  }
+  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l+'_daily'))){
+    loadDailyData();
+  }
+});
+
+updateAll();
+</script>
+</body>
+</html>
