@@ -329,7 +329,7 @@ tbody td.mc{text-align:left;font-weight:600;color:#3a2008;}
     </div>
 
     <div class="modal-line">
-      <span class="modal-line-badge">📊</span>
+      <span class="modal-line-badge">🍊</span>
       <div style="flex:1">
         <div style="font-size:11px;color:#888;margin-bottom:4px;">Google Sheet URL</div>
         <input id="sheetIdInput" type="text" placeholder="https://docs.google.com/spreadsheets/d/1B5P-2Ep..." style="width:100%;box-sizing:border-box;" />
@@ -778,7 +778,7 @@ function renderProdTable(d){
     const avail=tot>0?(r.run/tot*100).toFixed(0)+'%':'-';
     const availCls=tot>0&&(r.run/tot*100)>=70?'pos':tot>0&&(r.run/tot*100)>=50?'neu':'neg';
     const rate=r.wa>0?Math.round(r.pa/r.wa):0;
-    return `<tr><td class="mc">${lbl}</td><td>${(r.pp/1e6).toFixed(2)}M</td><td>${(r.pa/1e6).toFixed(2)}M</td><td><span class="badge ${cls}">${r.ach.toFixed(1)}%</span></td><td class="${availCls}">${avail}</td><td>${r.run}</td><td>${r.pm}</td><td>${r.sh}</td><td>${r.sb}</td><td>${N(rate)}</td></tr>`;
+    return `<tr><td class="mc">${lbl}</td><td>$x(r.pp/1e6).toFixed(2)}M</td><td>${(r.pa/1e6).toFixed(2)}M</td><td><span class="badge ${cls}">${r.ach.toFixed(1)}%</span></td><td class="${availCls}">${avail}</td><td>${r.run}</td><td>${r.pm}</td><td>${r.sh}</td><td>${r.sb}</td><td>${N(rate)}</td></tr>`;
   }).join('');
 }
 
@@ -1052,7 +1052,7 @@ async function submitMonthlyEntry(scriptUrl){
   msg.className='emsg'; msg.style.display='block'; msg.textContent='⏳ กำลังบันทึก…';
   try {
     await fetch(scriptUrl,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(data),mode:'no-cors'});
-    msg.className='emsg ok'; msg.textContent='✅ บันทึกสำเร็จ! ข้อมูลเดือน '+MTH[data.month]+' '+data.year+' Line '+data.line+' เข้า Google Sheet แล้ว';
+    msg.className='emsg ok'; msg.textContent='✅ บันทึกสำเร็จ! ข้อมูลเดือน '+MTH[data.month]+' '+data.year+" Line "+data.line+' เข้า Google Sheet แล้ว';
     ['ePlanBCM','eActualBCM','eWHPlan','eWHActual','eKWH','eDayRun','eDayPM','eDayShift','eDaySB'].forEach(id=>document.getElementById(id).value='');
   } catch(e){ msg.className='emsg err'; msg.textContent='❌ Error: '+e.message; }
 }
@@ -1101,7 +1101,7 @@ function parseDailyCSV(text){
     return {
       y:parseInt(obj['year']||obj['y'])||0, m:parseInt(obj['month']||obj['m'])||0,
       d:parseInt(obj['day']||obj['d'])||0, bcm:parseFloat(obj['bcm'])||0,
-      kwh:parseFloat(obj['kwh'])||0, wh:parseFloat(obj['wh'])||0
+      kwh:parseFloat(obj{'kwh'])||0, wh:parseFloat(obj{'wh'])||0
     };
   }).filter(r=>r.y>2000&&r.m>=1&&r.m<=12&&r.d>=1&&r.d<=31);
 }
@@ -1169,5 +1169,18 @@ function renderDailySection(){
   tbody.innerHTML = rows.join('');
 }
 
-/* ════════════ REALTIME DATA ════════════ */
-/* ── auto-l
+
+/* ── auto-load on open if URLs already saved ── */
+window.addEventListener('load', ()=>{
+  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l))){
+    loadFromSheets();
+  }
+  if(['WA','WB','WN'].some(l=>localStorage.getItem('sheetUrl_'+l+'_daily'))){
+    loadDailyData();
+  }
+});
+
+updateAll();
+</script>
+</body>
+</html>
